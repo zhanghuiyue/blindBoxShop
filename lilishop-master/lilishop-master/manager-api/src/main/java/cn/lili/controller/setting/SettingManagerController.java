@@ -149,6 +149,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new SmsSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SmsSetting.class));
+            case SMS253_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new Sms253Setting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), Sms253Setting.class));
             case POINT_SETTING:
                 return setting == null ?
                         ResultUtil.data(new PointSetting()) :
