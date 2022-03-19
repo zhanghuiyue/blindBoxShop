@@ -38,6 +38,7 @@ public class AdminApplication {
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
+            System.out.println("测试提交");
             SavedRequestAwareAuthenticationSuccessHandler successHandler = new SavedRequestAwareAuthenticationSuccessHandler();
             successHandler.setTargetUrlParameter("redirectTo");
             successHandler.setDefaultTargetUrl(this.adminServer.path("/"));
