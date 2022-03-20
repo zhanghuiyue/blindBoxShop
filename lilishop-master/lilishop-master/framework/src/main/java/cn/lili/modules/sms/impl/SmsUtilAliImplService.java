@@ -44,7 +44,7 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
+public class SmsUtilAliImplService implements AliSmsUtil {
 
     @Autowired
     private Cache cache;
@@ -59,7 +59,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
     @Autowired
     private SystemSettingProperties systemSettingProperties;
 
-    @Override
+    /*@Override
     public void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid) {
         //获取短信配置
         Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
@@ -196,7 +196,7 @@ public class SmsUtilAliImplService implements SmsUtil, AliSmsUtil {
         }
 
     }
-
+*/
 
     @Override
     public void addSmsSign(SmsSign smsSign) throws Exception {
