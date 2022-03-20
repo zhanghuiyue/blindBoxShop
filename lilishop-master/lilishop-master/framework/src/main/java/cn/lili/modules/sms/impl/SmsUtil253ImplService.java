@@ -173,7 +173,7 @@ public class SmsUtil253ImplService implements SmsUtil {
     @Override
     public void sendBatchSms(String signName, List<String> mobile, String templateCode) {
 
-        com.aliyun.dysmsapi20170525.Client client = this.createClient();
+
 
         List<String> sign = new ArrayList<String>();
 
@@ -200,7 +200,7 @@ public class SmsUtil253ImplService implements SmsUtil {
                     .setSignNameJson(JSONUtil.toJsonStr(signNameList.get(i)))
                     .setTemplateCode(templateCode);
             try {
-                client.sendBatchSms(sendBatchSmsRequest);
+               /* client.sendBatchSms(sendBatchSmsRequest);*/
             } catch (Exception e) {
                 log.error("批量发送短信错误", e);
             }
@@ -209,32 +209,7 @@ public class SmsUtil253ImplService implements SmsUtil {
     }
 
 
-    /**
-     * 初始化账号Client
-     *
-     * @return Client 短信操作util
-     */
-    public com.aliyun.dysmsapi20170525.Client createClient() {
-        try {
-            Setting setting = settingService.get(SettingEnum.SMS_SETTING.name());
-            if (StrUtil.isBlank(setting.getSettingValue())) {
-                throw new ServiceException(ResultCode.ALI_SMS_SETTING_ERROR);
-            }
-            SmsSetting smsSetting = new Gson().fromJson(setting.getSettingValue(), SmsSetting.class);
 
-            Config config = new Config();
-            //您的AccessKey ID
-            config.accessKeyId = smsSetting.getAccessKeyId();
-            //您的AccessKey Secret
-            config.accessKeySecret = smsSetting.getAccessSecret();
-            //访问的域名
-            config.endpoint = "dysmsapi.aliyuncs.com";
-            return new com.aliyun.dysmsapi20170525.Client(config);
-        } catch (Exception e) {
-            log.error("短信初始化错误", e);
-        }
-        return null;
-    }
     public static String sendSmsByPost(String postContent , String sendUrl) {
 
         try {
