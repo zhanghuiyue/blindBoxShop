@@ -25,6 +25,8 @@ public enum SettingEnum {
     OSS_SETTING,
     //阿里短信配置 
     SMS_SETTING,
+    //253短信配置
+    SMS253_SETTING,
     //积分设置
     POINT_SETTING,
     //经验值设置
