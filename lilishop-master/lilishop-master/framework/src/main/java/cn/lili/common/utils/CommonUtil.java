@@ -21,12 +21,12 @@ public class CommonUtil {
 
 
     /**
-     * 随机6位数生成
+     * 随机4位数生成
      */
     public static String getRandomNum() {
 
         Random random = new Random();
-        int num = random.nextInt(999999);
+        int num = random.nextInt(9999);
         //不足六位前面补0
         String str = String.format("%06d", num);
         return str;
