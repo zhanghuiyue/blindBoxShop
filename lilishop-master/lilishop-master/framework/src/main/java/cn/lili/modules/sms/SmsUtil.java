@@ -24,6 +24,8 @@ public interface SmsUtil {
      */
     void sendSmsCode(String mobile, VerificationEnums verificationEnums, String uuid);
 
+
+
     /**
      * 验证码验证
      *
@@ -39,11 +41,12 @@ public interface SmsUtil {
      * 短信发送
      *
      * @param mobile       接收手机号
-     * @param param        参数
-     * @param templateCode 模版code
-     * @param signName     签名名称
+     * @param content      发送内容
+     * @param account     账号
+     * @param password    秘钥
+     * @param password    发送地址
      */
-    void sendSmsCode(String signName, String mobile, Map<String, String> param, String templateCode);
+    void sendSmsCode(String content, String mobile, String account ,String password ,String sendUrl);
 
     /**
      * 短信批量发送
