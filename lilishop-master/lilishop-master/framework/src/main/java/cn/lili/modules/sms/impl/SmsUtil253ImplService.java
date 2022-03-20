@@ -80,11 +80,6 @@ public class SmsUtil253ImplService implements SmsUtil {
         //验证码
         String code = CommonUtil.getRandomNum();
 
-        //准备发送短信参数
-        Map<String, String> params = new HashMap<>(2);
-        //验证码内容
-        params.put("code", code);
-
         //发送内容 默认为登录验证
         String content;
 
@@ -92,17 +87,20 @@ public class SmsUtil253ImplService implements SmsUtil {
         switch (verificationEnums) {
             //登录
             case LOGIN: {
-                content = smsTemplateProperties.getLOGIN();
+                content =sms253Setting.getSignName()+ smsTemplateProperties.getLOGIN();
+                content = content.replace("@", code);
                 break;
             }
             //注册
             case REGISTER: {
-                content = smsTemplateProperties.getREGISTER();
+                content = sms253Setting.getSignName()+smsTemplateProperties.getREGISTER();
+                content = content.replace("@", code);
                 break;
             }
             //找回密码
             case FIND_USER: {
-                content = smsTemplateProperties.getFIND_USER();
+                content = sms253Setting.getSignName()+smsTemplateProperties.getFIND_USER();
+                content = content.replace("@", code);
                 break;
             }
             //修改密码
@@ -113,7 +111,8 @@ public class SmsUtil253ImplService implements SmsUtil {
                 }
                 //更新为用户最新手机号
                 mobile = member.getMobile();
-                content = smsTemplateProperties.getUPDATE_PASSWORD();
+                content =sms253Setting.getSignName()+ smsTemplateProperties.getUPDATE_PASSWORD();
+                content = content.replace("@", code);
                 break;
             }
             //设置支付密码
@@ -121,7 +120,8 @@ public class SmsUtil253ImplService implements SmsUtil {
                 Member member = memberService.getById(UserContext.getCurrentUser().getId());
                 //更新为用户最新手机号
                 mobile = member.getMobile();
-                content = smsTemplateProperties.getWALLET_PASSWORD();
+                content =sms253Setting.getSignName()+ smsTemplateProperties.getWALLET_PASSWORD();
+                content = content.replace("@", code);
                 break;
             }
             //如果不是有效的验证码手段，则此处不进行短信操作
@@ -133,7 +133,7 @@ public class SmsUtil253ImplService implements SmsUtil {
             code = "111111";
         } else {
             //发送短信
-            this.sendSmsCode(content , mobile,sms253Setting.getAccessKeyId() ,sms253Setting.getAccessSecret(),sms253Setting.getSendUrl() );
+           this.sendSmsCode(content , mobile,sms253Setting.getAccessKeyId() ,sms253Setting.getAccessSecret(),sms253Setting.getSendUrl() );
         }
         //缓存中写入要验证的信息
         cache.put(cacheKey(verificationEnums, mobile, uuid), code, 300L);
