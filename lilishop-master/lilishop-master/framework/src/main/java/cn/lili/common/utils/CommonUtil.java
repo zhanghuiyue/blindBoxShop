@@ -28,7 +28,7 @@ public class CommonUtil {
         Random random = new Random();
         int num = random.nextInt(9999);
         //不足六位前面补0
-        String str = String.format("%06d", num);
+        String str = String.format("%04d", num);
         return str;
     }
 
