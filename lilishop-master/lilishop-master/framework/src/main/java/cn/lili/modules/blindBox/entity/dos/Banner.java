@@ -7,7 +7,10 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import org.hibernate.validator.constraints.Length;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 /**
  * 商品品牌
@@ -34,5 +37,12 @@ public class Banner extends BaseEntity {
     @ApiModelProperty(value = "banner图片", required = true)
     private String image;
 
+    @NotNull(message = "排序值不能为空")
+    @Max(value = 999,message = "排序值最大999")
+    @ApiModelProperty(value = "排序值")
+    private BigDecimal sortOrder;
+
+    @ApiModelProperty(value = "跳转地址")
+    private String urlInfo;
 
 }
