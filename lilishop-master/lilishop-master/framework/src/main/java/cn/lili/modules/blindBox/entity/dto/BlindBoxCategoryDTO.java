@@ -1,7 +1,9 @@
 package cn.lili.modules.blindBox.entity.dto;
 
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
+@Data
 public class BlindBoxCategoryDTO {
     @ApiModelProperty(value = "id")
     private String id;

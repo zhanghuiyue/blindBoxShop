@@ -4,9 +4,10 @@ import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.Data;
 
 import java.util.List;
-
+@Data
 public class BlindBoxPriceVO {
 
     @ApiModelProperty(value = "盲盒价格列表")

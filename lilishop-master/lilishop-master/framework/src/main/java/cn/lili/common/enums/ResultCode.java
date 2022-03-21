@@ -479,7 +479,14 @@ public enum ResultCode {
     CONNECT_NOT_EXIST(90000, "登录方式不存在！"),
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
-    INDEX_BUILDING(90005, "索引正在生成");
+    INDEX_BUILDING(90005, "索引正在生成"),
+
+    /**
+     * 订单
+     */
+    ORDER_NOT_EXIT_ERROR(100000,"订单不存在"),
+    ORDER_NOT_PAY_ERROR(100001,"订单未支付"),
+    ORDER_EXTRACT_ERROR(100002,"订单未支付");
 
 
     private final Integer code;

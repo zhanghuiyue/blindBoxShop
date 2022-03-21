@@ -5,6 +5,7 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -147,4 +148,11 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      * @return
      */
     List<MemberCoupon> getBlidBoxUnUseCoupon(String memberId, Double totalPrice);
+
+    /**
+     * 更新优惠券状态
+     * @param memberId
+     * @param couponId
+     */
+    void updateMemberCouponByCouponId(String memberId,String couponId);
 }

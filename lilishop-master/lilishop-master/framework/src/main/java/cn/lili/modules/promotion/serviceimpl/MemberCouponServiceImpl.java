@@ -296,4 +296,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         return this.baseMapper.queryBlidBoxUnUseCoupon(memberId,totalPrice,new Date(),false,"0");
     }
 
+    @Override
+    public void updateMemberCouponByCouponId(String memberId, String couponId) {
+         this.baseMapper.updateMemberCouponByCouponId(memberId,couponId);
+    }
+
+
 }

@@ -30,39 +30,4 @@ public class Price extends BaseEntity {
     @ApiModelProperty(value = "种类id")
     private String blindBoxCategory;
 
-    public static long getSerialVersionUID() {
-        return serialVersionUID;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public Double getOriginalPrice() {
-        return originalPrice;
-    }
-
-    public void setOriginalPrice(Double originalPrice) {
-        this.originalPrice = originalPrice;
-    }
-
-    public Integer getNum() {
-        return num;
-    }
-
-    public void setNum(Integer num) {
-        this.num = num;
-    }
-
-    public String getBlindBoxCategory() {
-        return blindBoxCategory;
-    }
-
-    public void setBlindBoxCategory(String blindBoxCategory) {
-        this.blindBoxCategory = blindBoxCategory;
-    }
 }
