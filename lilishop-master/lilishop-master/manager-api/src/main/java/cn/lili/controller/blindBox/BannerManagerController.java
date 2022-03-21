@@ -41,7 +41,7 @@ public class BannerManagerController {
     private BannerService bannerService;
 
     @ApiOperation(value = "通过id获取")
-    @ApiImplicitParam(name = "id", value = "品牌ID", required = true, dataType = "String", paramType = "path")
+    @ApiImplicitParam(name = "id", value = "ID", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/get/{id}")
     public ResultMessage<Banner> get(@NotNull @PathVariable String id) {
         return ResultUtil.data(bannerService.getById(id));
@@ -60,9 +60,12 @@ public class BannerManagerController {
         return ResultUtil.data(bannerService.getBannersByPage(page));
     }
 
-    @ApiOperation(value = "新增推荐banner")
+    @ApiOperation(value = "新增推荐")
     @PostMapping
     public ResultMessage<BannerVO> save(@Valid BannerVO banner) {
+
+        System.out.println("新增推荐广告 ：");
+        System.out.println("新增推荐广告 ："+banner.toString());
         if (bannerService.addBanner(banner)) {
             return ResultUtil.data(banner);
         }
@@ -70,7 +73,7 @@ public class BannerManagerController {
     }
 
     @ApiOperation(value = "更新数据")
-    @ApiImplicitParam(name = "id", value = "品牌ID", required = true, dataType = "String", paramType = "path")
+    @ApiImplicitParam(name = "id", value = "ID", required = true, dataType = "String", paramType = "path")
     @PutMapping("/{id}")
     public ResultMessage<BannerVO> update(@PathVariable String id, @Valid BannerVO banner) {
         banner.setId(id);
@@ -80,9 +83,9 @@ public class BannerManagerController {
         throw new ServiceException(ResultCode. BANNER_UPDATE_ERROR);
     }
 
-    @ApiOperation(value = "后台禁用品牌")
+    @ApiOperation(value = "后台禁用")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "brandId", value = "品牌ID", required = true, dataType = "String", paramType = "path"),
+            @ApiImplicitParam(name = "brandId", value = "ID", required = true, dataType = "String", paramType = "path"),
             @ApiImplicitParam(name = "disable", value = "是否可用", required = true, dataType = "boolean", paramType = "query")
     })
     @PutMapping(value = "/disable/{brandId}")
@@ -94,7 +97,7 @@ public class BannerManagerController {
     }
 
     @ApiOperation(value = "批量删除")
-    @ApiImplicitParam(name = "ids", value = "品牌ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
+    @ApiImplicitParam(name = "ids", value = "ID", required = true, dataType = "String", allowMultiple = true, paramType = "path")
     @DeleteMapping(value = "/delByIds/{ids}")
     public ResultMessage<Object> delAllByIds(@PathVariable List<String> ids) {
         bannerService.deleteBanners(ids);
