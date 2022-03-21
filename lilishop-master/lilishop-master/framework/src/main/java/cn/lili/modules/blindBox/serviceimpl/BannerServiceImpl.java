@@ -50,7 +50,7 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     public boolean addBanner(BannerVO bannerVO) {
 
         if (getOne(new LambdaQueryWrapper<Banner>().eq(Banner::getName, bannerVO.getName())) != null) {
-            throw new ServiceException(ResultCode.BRAND_NAME_EXIST_ERROR);
+            throw new ServiceException(ResultCode.BANNER_NAME_EXIST_ERROR);
         }
         return this.save(bannerVO);
     }
@@ -59,7 +59,7 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     public boolean updateBanner(BannerVO bannerVO) {
         this.checkExist(bannerVO.getId());
         if (getOne(new LambdaQueryWrapper<Banner>().eq(Banner::getName, bannerVO.getName()).ne(Banner::getId, bannerVO.getId())) != null) {
-            throw new ServiceException(ResultCode.BRAND_NAME_EXIST_ERROR);
+            throw new ServiceException(ResultCode.BANNER_NAME_EXIST_ERROR);
         }
         return this.updateById(bannerVO);
     }
