@@ -460,6 +460,17 @@ public enum ResultCode {
     APP_VERSION_EXIST(80307, "APP版本已存在"),
 
     /**
+     *
+     *盲盒
+     */
+    BANNER_UPDATE_ERROR(114002, "banner修改失败"),
+    BANNER_DISABLE_ERROR(114002, "banner禁用失败"),
+    BANNER_SAVE_ERROR(14001, "banner添加失败"),
+    BANNER_DELETE_ERROR(14004, "banner删除失败"),
+    BANNER_NAME_EXIST_ERROR(20002, "banner名称重复！"),
+    BANNER_NOT_EXIST(20004, "banner不存在"),
+
+    /**
      * 其他
      */
     CUSTOM_WORDS_EXIST_ERROR(90000, "当前自定义分词已存在！"),
@@ -469,6 +480,7 @@ public enum ResultCode {
     ELASTICSEARCH_INDEX_INIT_ERROR(90003, "索引初始化失败！"),
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
     INDEX_BUILDING(90005, "索引正在生成");
+
 
     private final Integer code;
     private final String message;
