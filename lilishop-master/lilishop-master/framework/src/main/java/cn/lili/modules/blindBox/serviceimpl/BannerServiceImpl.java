@@ -92,8 +92,8 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     private Banner checkExist(String bannerId) {
         Banner banner = getById(bannerId);
         if (banner == null) {
-            log.error("品牌ID为" + bannerId + "的品牌不存在");
-            throw new ServiceException(ResultCode.BRAND_NOT_EXIST);
+            log.error("品牌ID为" + bannerId + "的BANNER不存在");
+            throw new ServiceException(ResultCode.BANNER_NOT_EXIST);
         }
         return banner;
     }
