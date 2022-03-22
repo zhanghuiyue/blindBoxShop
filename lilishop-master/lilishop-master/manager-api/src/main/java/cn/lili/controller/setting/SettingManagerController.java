@@ -72,7 +72,7 @@ public class SettingManagerController {
             "WECHAT_PC_CONNECT,WECHAT_WAP_CONNECT,WECHAT_APP_CONNECT,WECHAT_MP_CONNECT," +
             "QQ_WEB_CONNECT,QQ_APP_CONNECT," +
             "QQ_WEB_CONNECT,QQ_APP_CONNECT,WEIBO_CONNECT,ALIPAY_CONNECT," +
-            "PAYMENT_SUPPORT,ALIPAY_PAYMENT,WECHAT_PAYMENT,SECKILL_SETTING,EXPERIENCE_SETTING,IM"
+            "PAYMENT_SUPPORT,ALIPAY_PAYMENT,WECHAT_PAYMENT,SECKILL_SETTING,SECKILL_BOX_SETTING,EXPERIENCE_SETTING,IM"
     )
     public ResultMessage settingGet(@PathVariable String key) {
         return createSetting(key);
@@ -181,6 +181,10 @@ public class SettingManagerController {
                 return setting == null ?
                         ResultUtil.data(new SeckillSetting()) :
                         ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SeckillSetting.class));
+            case SECKILL_BOX_SETTING:
+                return setting == null ?
+                        ResultUtil.data(new SeckillBoxSetting()) :
+                        ResultUtil.data(JSONUtil.toBean(setting.getSettingValue(), SeckillBoxSetting.class));
             case EXPERIENCE_SETTING:
                 return setting == null ?
                         ResultUtil.data(new ExperienceSetting()) :
