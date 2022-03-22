@@ -69,4 +69,6 @@ public class BlindBoxController {
         return ResultUtil.data(blindBoxService.blindBoxExtract(extractParam));
     }
 
+
+
 }

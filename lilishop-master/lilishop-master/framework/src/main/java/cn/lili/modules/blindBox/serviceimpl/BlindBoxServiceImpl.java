@@ -8,12 +8,15 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.modules.blindBox.entity.dos.Banner;
 import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
+import cn.lili.modules.blindBox.entity.dos.Prize;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
 import cn.lili.modules.blindBox.entity.vo.BlindBoxGoodsVO;
 import cn.lili.modules.blindBox.entity.vo.ExtractParam;
 import cn.lili.modules.blindBox.entity.vo.OrderParam;
 import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
+import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
 
 import cn.lili.modules.goods.entity.dos.BlindBoxGoods;
@@ -30,16 +33,14 @@ import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 @Service
 public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,BlindBoxCategory> implements BlindBoxService {
@@ -53,9 +54,12 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
     @Autowired
     private BlindBoxGoodsService blindBoxGoodsService;
 
+    @Autowired
+    private BlindBoxPrizeService blindBoxPrizeService;
+
     @Override
     public List<BlindBoxCategory> queryBlindBoxCategoryList() {
-        return this.queryBlindBoxCategoryList();
+        return this.baseMapper.queryBlindBoxCategoryList();
     }
 
     @Override
@@ -101,9 +105,38 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         List<BlindBoxGoods> blindBoxGoods = blindBoxGoodsService.queryList(blindBoxOrder.getBlindBoxCategory());
         //抽奖
         BlindBoxGoodsVO boxGoods = extract(blindBoxGoods,blindBoxOrder.getGoodsNum());
+        //记录奖品
+        LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<>();
+        if (StringUtils.isNotBlank(extractParam.getBlindBoxCategory())) {
+            queryWrapper.eq(BlindBoxCategory::getId, extractParam.getBlindBoxCategory());
+        }
+        BlindBoxCategory blindBoxCategory = this.baseMapper.selectOne(queryWrapper);
+        blindBoxPrizeService.batchAddPrize(bulidPrizeList(blindBoxGoods,blindBoxCategory));
         return boxGoods;
     }
 
+    /**
+     * 构建prideList
+     * @param blindBoxGoods
+     * @param blindBoxCategory
+     * @return
+     */
+    public List<Prize> bulidPrizeList(List<BlindBoxGoods> blindBoxGoods,BlindBoxCategory blindBoxCategory){
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        List<Prize> prizeList = new ArrayList<>();
+        for (BlindBoxGoods boxGoods :blindBoxGoods) {
+            Prize prize= new Prize();
+            prize.setBlindBoxCategory(blindBoxCategory.getId());
+            prize.setGoodsId(boxGoods.getId());
+            prize.setImage(blindBoxCategory.getImage());
+            prize.setName(blindBoxCategory.getName());
+            prize.setMemberId(currentUser.getId());
+            prize.setSubstitutionFlag("0");
+            prize.setSubstitutionNum(0);
+            prizeList.add(prize);
+        }
+        return prizeList;
+    }
     /**
      * 商品的抽取
      * @param blindBoxGoods
@@ -117,13 +150,14 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         for (int i=0; i<blindBoxGoods.size();i++) {
             arr[i] = blindBoxGoods.get(i).getProbability();
         }
+        Arrays.sort(arr);
         Random random = new Random();
         int flag = -1;
         for(int j=0;j<=num;j++) {
             int rn = random.nextInt(100);
             for(int k=0;k<arr.length;k++){
                 if(rn>arr[k-1] && rn<=arr[k]){
-                    flag=k-1;
+                    flag=k;
                     BlindBoxGoodsDTO blindBoxGoodsDTO = new BlindBoxGoodsDTO();
                     BeanUtil.copyProperties(blindBoxGoods.get(flag),blindBoxGoodsDTO);
                     blindBoxGoodsDTOS.add(blindBoxGoodsDTO);

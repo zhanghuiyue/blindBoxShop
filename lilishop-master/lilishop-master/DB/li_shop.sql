@@ -13,6 +13,7 @@ CREATE TABLE `li_price` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+DROP TABLE li_prize
 CREATE TABLE `li_prize` (
   `id` BIGINT NOT NULL COMMENT 'ID',
   `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
@@ -21,12 +22,11 @@ CREATE TABLE `li_prize` (
   `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
   `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
   `goods_id` VARCHAR(255) DEFAULT NULL COMMENT '商品ID',
-  `mobile` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
-  `substitution_goods_id` VARCHAR(255) DEFAULT NULL COMMENT '置换商品的id',
-  `sku_id` VARCHAR(255) DEFAULT NULL COMMENT '商品的skuid',
-  `substitution_sku_id` VARCHAR(255) DEFAULT NULL COMMENT '置换商品的skuid',
-  `substitution_num` INT DEFAULT NULL COMMENT '置换次数',
-  `open_box_flag` CHAR(1) DEFAULT NULL COMMENT '开盒标识,0表示未开盒，1表示已开盒',
+  `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员ID',
+  `substitution_flag` char(1) DEFAULT NULL COMMENT '置换标识，0表示未置换，1表示已置换',
+  `substitution_num` INT DEFAULT NULL COMMENT '置换次数'
+  `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
+  `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -66,13 +66,14 @@ CREATE TABLE `li_blind_box_goods` (
   `small` VARCHAR(255)  DEFAULT NULL COMMENT '小图路径',
   `big` VARCHAR(255)  DEFAULT NULL COMMENT '大图路径',
   `quantity` INT DEFAULT NULL COMMENT '库存',
-  `probability` FLOAT(10,2) COMMENT '中奖概率',
+  `specs` VARCHAR(255)  DEFAULT NULL COMMENT '规格信息',
+  `probability` INT COMMENT '中奖概率',
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-ALTER TABLE li_member_coupon ADD coupon_name VARCHAR(255) COMMENT '优惠券名称';
-ALTER TABLE li_member_coupon ADD `name` VARCHAR(255) COMMENT '盲盒名称';
+ALTER TABLE li_member_coupon ADD coupon_name VARCHAR(255)DEFAULT NULL COMMENT '优惠券名称';
+ALTER TABLE li_member_coupon ADD `name` VARCHAR(255) DEFAULT NULL COMMENT '盲盒名称';
 
 DROP TABLE li_blind_box_order
 CREATE TABLE `li_blind_box_order` (
@@ -84,29 +85,16 @@ CREATE TABLE `li_blind_box_order` (
   `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
   `cancel_reason` VARCHAR(255) DEFAULT NULL COMMENT '订单取消原因',
   `complete_time` DATETIME(6) DEFAULT NULL COMMENT '完成时间',
-  `consignee_address_id_path` VARCHAR(255) DEFAULT NULL COMMENT '地址id ,分割',
-  `consignee_address_path` VARCHAR(255) DEFAULT NULL COMMENT '地址名称 ,分割',
-  `consignee_detail` VARCHAR(255) DEFAULT NULL COMMENT '详细地址',
-  `consignee_mobile` VARCHAR(255) DEFAULT NULL COMMENT '收件人手机',
-  `consignee_name` VARCHAR(255) DEFAULT NULL COMMENT '收件人姓名',
-  `deliver_status` VARCHAR(255) DEFAULT NULL COMMENT '货运状态',
   `discount_price` DOUBLE(10,2) DEFAULT NULL COMMENT '优惠的金额',
   `flow_price` VARCHAR(255) DEFAULT NULL COMMENT '总价格',
-  `freight_price` DOUBLE(10,2) DEFAULT NULL COMMENT '运费',
   `goods_num` INT DEFAULT NULL COMMENT '商品数量',
-  `logistics_code` VARCHAR(255) DEFAULT NULL COMMENT '物流公司CODE',
-  `logistics_name` VARCHAR(255) DEFAULT NULL COMMENT '物流公司名称',
-  `logistics_no` VARCHAR(255) DEFAULT NULL COMMENT '发货单号',
-  `logistics_time` DATETIME(6) DEFAULT NULL COMMENT '送货时间',
   `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员ID',
   `member_name` VARCHAR(255) DEFAULT NULL COMMENT '用户名',
   `order_status` VARCHAR(255) DEFAULT NULL COMMENT '订单状态',
   `pay_order_no` VARCHAR(255) DEFAULT NULL COMMENT '支付方式返回的交易号',
   `pay_status` VARCHAR(255) DEFAULT NULL COMMENT '付款状态',
   `payment_method` VARCHAR(255) DEFAULT NULL COMMENT '支付方式',
-  `payment_time` DATETIME(6) DEFAULT NULL COMMENT '支付方式返回的交易号',
-  `qr_code` VARCHAR(255) DEFAULT NULL COMMENT '提货码',
-  `delivery_method` VARCHAR(255) DEFAULT NULL COMMENT '配送方式',
+  `payment_time` DATETIME(6) DEFAULT NULL COMMENT '支付时间',
   `coupon_id` VARCHAR(255) DEFAULT NULL COMMENT '优惠券id',
   `sn` VARCHAR(255) DEFAULT NULL COMMENT '订单编号',
   `receivable_no` VARCHAR(255) DEFAULT NULL COMMENT '第三方付款流水号',
@@ -116,7 +104,34 @@ CREATE TABLE `li_blind_box_order` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+ALTER TABLE li_order ADD substitution_flag CHAR(1) DEFAULT NULL COMMENT '1表示置换，0表示兑换';
+ALTER TABLE li_order ADD  goods_id_path VARCHAR(255) DEFAULT NULL  COMMENT '置换商品编号用逗号隔开';
+ALTER TABLE li_order ADD  buy_goods_id VARCHAR(255) DEFAULT NULL  COMMENT '购买商品编号';
 
+drop table li_substitution_order
 
-
-
+CREATE TABLE `li_substitution_order` (
+  `id` BIGINT NOT NULL COMMENT 'ID',
+  `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
+  `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
+  `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
+  `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
+  `cancel_reason` VARCHAR(255) DEFAULT NULL COMMENT '订单取消原因',
+  `complete_time` DATETIME(6) DEFAULT NULL COMMENT '完成时间',
+  `pay_amount` DOUBLE(10,2) DEFAULT NULL COMMENT '付款金额',
+  `goods_num` INT DEFAULT NULL COMMENT '商品数量',
+  `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员ID',
+  `member_name` VARCHAR(255) DEFAULT NULL COMMENT '用户名',
+  `order_status` VARCHAR(255) DEFAULT NULL COMMENT '订单状态',
+  `pay_order_no` VARCHAR(255) DEFAULT NULL COMMENT '支付方式返回的交易号',
+  `pay_status` VARCHAR(255) DEFAULT NULL COMMENT '付款状态',
+  `payment_method` VARCHAR(255) DEFAULT NULL COMMENT '支付方式',
+  `payment_time` DATETIME(6) DEFAULT NULL COMMENT '支付时间',
+  `sn` VARCHAR(255) DEFAULT NULL COMMENT '订单编号',
+  `receivable_no` VARCHAR(255) DEFAULT NULL COMMENT '第三方付款流水号',
+  `goods_id_path` VARCHAR(255) DEFAULT NULL  COMMENT '置换商品编号用逗号隔开',
+	`buy_goods_id` VARCHAR(255) DEFAULT NULL  COMMENT '购买商品编号',
+	`sku_id` VARCHAR(255) DEFAULT NULL  COMMENT '购买商品skuid',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;

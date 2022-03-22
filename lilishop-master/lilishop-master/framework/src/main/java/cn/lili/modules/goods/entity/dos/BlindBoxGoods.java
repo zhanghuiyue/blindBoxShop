@@ -54,4 +54,6 @@ public class BlindBoxGoods extends BaseIdEntity {
     @ApiModelProperty(value = "种类id")
     private Float blindBoxCategory;
 
+    @ApiModelProperty(value = "商品规格")
+    private String specs;
 }

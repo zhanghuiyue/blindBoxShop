@@ -11,4 +11,6 @@ import java.util.List;
 public interface BlindBoxGoodsService extends IService<BlindBoxGoods> {
 
     List<BlindBoxGoods> queryList(String categoryId);
+
+    List<BlindBoxGoods> batchQueryById(List<String> goodsId);
 }

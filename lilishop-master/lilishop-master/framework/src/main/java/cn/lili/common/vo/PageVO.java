@@ -23,6 +23,15 @@ public class PageVO implements Serializable {
     @ApiModelProperty(value = "页面大小")
     private Integer pageSize = 10;
 
+    @ApiModelProperty(value = "当前页")
+    private long currentPage;
+
+    @ApiModelProperty(value = "总条数")
+    private long total;
+
+    @ApiModelProperty(value = "总页数")
+    private long pages;
+
     @ApiModelProperty(value = "排序字段")
     private String sort;
 
