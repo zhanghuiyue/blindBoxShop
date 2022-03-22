@@ -54,7 +54,7 @@ public class BlindBoxRecommendController {
     @Autowired
     private BannerService bannerService;
 
-    @ApiOperation(value = "获取文章分类列表")
+    @ApiOperation(value = "获取推荐banner列表")
     @GetMapping(value = "/banner/list")
     public ResultMessage<List<Banner>> getBannersList() {
         return ResultUtil.data(bannerService.getBannersList() );
