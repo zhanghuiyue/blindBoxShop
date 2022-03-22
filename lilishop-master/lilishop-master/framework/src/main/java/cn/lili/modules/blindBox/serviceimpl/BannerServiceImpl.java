@@ -1,6 +1,8 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
 
+import cn.lili.cache.Cache;
+import cn.lili.cache.CachePrefix;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.blindBox.entity.dos.Banner;
@@ -13,6 +15,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,6 +31,12 @@ import java.util.List;
  */
 @Service
 public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> implements BannerService {
+
+    /**
+     * 缓存
+     */
+    @Autowired
+    private Cache cache;
 
 
     @Override
@@ -98,10 +107,16 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     @Override
     public List<Banner> getBannersList(){
 
-        //获取全部分类
+        //获取全部可用合集
+        List<Banner> bannerList = (List<Banner>) cache.get(CachePrefix.BOXBANNER.getPrefix());
+        if(bannerList!= null){
+            return bannerList ;
+        }
         List<Banner> list = this.list(new QueryWrapper<Banner>().eq("delete_flag", 0));
         list.sort(Comparator.comparing(Banner::getSortOrder));
-
+        if (!list.isEmpty()) {
+            cache.put(CachePrefix.BOXBANNER.getPrefix(), list);
+        }
         return  list ;
     }
 
