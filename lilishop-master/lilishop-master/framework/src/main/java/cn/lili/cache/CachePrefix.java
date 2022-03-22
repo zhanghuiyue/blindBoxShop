@@ -481,6 +481,12 @@ public enum CachePrefix {
      * 订单暂时缓存
      */
     ORDER,
+
+    /**
+     * 盲盒推荐 banner
+     */
+    BOXBANNER,
+
     /**
      * 敏感词
      */
