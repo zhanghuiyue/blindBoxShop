@@ -133,6 +133,7 @@ ignored:
     - /buyer/other/article/**
     - /buyer/goods/**
     - /buyer/store/**
+    - /buyer/blindBox/**
     - /buyer/passport/connect/**
     - /buyer/members/**
     - /buyer/passport/member/**

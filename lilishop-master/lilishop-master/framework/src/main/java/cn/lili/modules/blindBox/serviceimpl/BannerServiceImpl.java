@@ -1,6 +1,6 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
-import cn.hutool.json.JSONUtil;
+
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.blindBox.entity.dos.Banner;
@@ -8,22 +8,16 @@ import cn.lili.modules.blindBox.entity.dto.BannerPageDTO;
 import cn.lili.modules.blindBox.entity.vo.BannerVO;
 import cn.lili.modules.blindBox.mapper.BannerMapper;
 import cn.lili.modules.blindBox.service.BannerService;
-import cn.lili.modules.goods.entity.dos.Brand;
-import cn.lili.modules.goods.entity.dos.CategoryBrand;
-import cn.lili.modules.goods.entity.dos.Goods;
-import cn.lili.modules.goods.entity.vos.BrandVO;
-import cn.lili.modules.goods.service.BrandService;
-
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 
 /**
@@ -96,6 +90,19 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
             throw new ServiceException(ResultCode.BANNER_NOT_EXIST);
         }
         return banner;
+    }
+
+    /**
+     * 得到推荐可用banner合集
+     */
+    @Override
+    public List<Banner> getBannersList(){
+
+        //获取全部分类
+        List<Banner> list = this.list(new QueryWrapper<Banner>().eq("delete_flag", 0));
+        list.sort(Comparator.comparing(Banner::getSortOrder));
+
+        return  list ;
     }
 
 }

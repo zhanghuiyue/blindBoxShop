@@ -58,4 +58,12 @@ public interface BannerService extends IService<Banner> {
      */
     boolean brandDisable(String bannerId, boolean disable);
 
+    /**
+     * 得到可用推荐banner合集
+     *
+     */
+
+    List<Banner> getBannersList();
+
+
 }
