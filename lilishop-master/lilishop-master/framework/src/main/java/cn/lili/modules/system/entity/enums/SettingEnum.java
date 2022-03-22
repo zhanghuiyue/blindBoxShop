@@ -36,6 +36,9 @@ public enum SettingEnum {
     //IM 配置
     IM_SETTING,
 
+    //盲盒秒杀活动设置
+    SECKILL_BOX_SETTING,
+
     //微信 联合登陆设置
     WECHAT_CONNECT,
     //QQ 浏览器 联合登录设置
