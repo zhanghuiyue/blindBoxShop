@@ -25,4 +25,10 @@ public class BlindBoxGoodsServiceImpl extends ServiceImpl<BlindBoxGoodsMapper, B
         queryWrapper.gt("quantity","0");
         return this.baseMapper.selectList(queryWrapper);
     }
+
+    @Override
+    public List<BlindBoxGoods> batchQueryById(List<String> goodsId) {
+
+        return this.baseMapper.selectBatchIds(goodsId);
+    }
 }

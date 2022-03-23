@@ -1,12 +1,7 @@
 package cn.lili.modules.order.order.entity.dos;
 
-import cn.lili.common.enums.ClientTypeEnum;
-import cn.lili.common.utils.BeanUtil;
-import cn.lili.modules.blindBox.entity.vo.OrderParam;
-import cn.lili.modules.order.cart.entity.dto.TradeDTO;
-import cn.lili.modules.order.cart.entity.enums.DeliveryMethodEnum;
-import cn.lili.modules.order.cart.entity.vo.CartVO;
-import cn.lili.modules.order.order.entity.enums.*;
+import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,10 +16,10 @@ import java.util.Date;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-@TableName("li_blind_box_order")
+@TableName("li_substitution_order")
 @ApiModel(value = "订单")
 @NoArgsConstructor
-public class BlindBoxOrder extends BaseEntity {
+public class SubstitutionOrder extends BaseEntity {
 
     private static final long serialVersionUID = 2233811628066468683L;
     @ApiModelProperty("订单编号")
@@ -32,12 +27,6 @@ public class BlindBoxOrder extends BaseEntity {
 
     @ApiModelProperty("交易编号 关联Trade")
     private String tradeSn;
-
-    @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
-
-    @ApiModelProperty(value = "盲盒名称")
-    private String name;
 
     @ApiModelProperty(value = "会员ID")
     private String memberId;
@@ -50,9 +39,6 @@ public class BlindBoxOrder extends BaseEntity {
      */
     @ApiModelProperty(value = "订单状态")
     private String orderStatus;
-
-    @ApiModelProperty(value = "抽取状态")
-    private String extractStatus;
 
     /**
      * @see PayStatusEnum
@@ -71,14 +57,8 @@ public class BlindBoxOrder extends BaseEntity {
     @JsonFormat(timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     private Date paymentTime;
 
-    @ApiModelProperty(value = "总价格")
-    private Double flowPrice;
-
-    @ApiModelProperty(value = "商品价格")
-    private Double goodsPrice;
-
-    @ApiModelProperty(value = "优惠的金额")
-    private Double discountPrice;
+    @ApiModelProperty(value = "付款金额")
+    private Double payAmount;
 
     @ApiModelProperty(value = "商品数量")
     private Integer goodsNum;
@@ -93,17 +73,12 @@ public class BlindBoxOrder extends BaseEntity {
     @ApiModelProperty(value = "支付方式返回的交易号")
     private String payOrderNo;
 
-    @ApiModelProperty(value = "优惠券id")
-    private String couponId;
+    @ApiModelProperty(value = "'置换商品编号用逗号隔开")
+    private String goodsIdPath;
 
+    @ApiModelProperty(value = "'购买商品编号")
+    private String buyGoodsId;
 
-    public BlindBoxOrder(OrderParam orderParam) {
-        String oldId = this.getId();
-        BeanUtil.copyProperties(orderParam, this);
-        setId(oldId);
-
-        //设置默认支付状态
-        this.setOrderStatus(OrderStatusEnum.UNPAID.name());
-        this.setPayStatus(PayStatusEnum.UNPAID.name());
-    }
+    @ApiModelProperty(value = "'购买商品skuid")
+    private String skuId;
 }
