@@ -481,6 +481,9 @@ public enum ResultCode {
     PURCHASE_ORDER_DEADLINE_ERROR(90004, "供求单，已超过报名截止时间"),
     INDEX_BUILDING(90005, "索引正在生成"),
 
+
+    SECKILL_BOX_SAVE_ERROR(45006, "该盲盒秒杀活动添加失败"),
+
     /**
      * 订单
      */
