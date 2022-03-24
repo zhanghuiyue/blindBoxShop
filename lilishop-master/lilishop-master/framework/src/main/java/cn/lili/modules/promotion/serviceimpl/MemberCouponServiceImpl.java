@@ -286,14 +286,26 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     public List<MemberCoupon> getBlidBoxCanUseCoupon(String memberId, Double totalPrice) {
-
-        return this.baseMapper.queryBlidBoxCanUseCoupon(memberId,totalPrice,new Date(),false,"0");
+        QueryWrapper<MemberCoupon> queryWrapper = Wrappers.query();
+        queryWrapper.eq("member_id", memberId);
+        queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.NEW.name());
+        queryWrapper.eq("delete_flag", 0);
+        queryWrapper.ge("end_time",new Date());
+        queryWrapper.le("consume_threshold",totalPrice);
+        queryWrapper.eq("get_type",CouponGetEnum.BLINDBOX.name());
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
     public List<MemberCoupon> getBlidBoxUnUseCoupon(String memberId, Double totalPrice) {
-
-        return this.baseMapper.queryBlidBoxUnUseCoupon(memberId,totalPrice,new Date(),false,"0");
+        QueryWrapper<MemberCoupon> queryWrapper = Wrappers.query();
+        queryWrapper.eq("member_id", memberId);
+        queryWrapper.eq("member_coupon_status", MemberCouponStatusEnum.NEW.name());
+        queryWrapper.eq("delete_flag", 0);
+        queryWrapper.ge("end_time",new Date());
+        queryWrapper.gt("consume_threshold",totalPrice);
+        queryWrapper.eq("get_type",CouponGetEnum.BLINDBOX.name());
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override

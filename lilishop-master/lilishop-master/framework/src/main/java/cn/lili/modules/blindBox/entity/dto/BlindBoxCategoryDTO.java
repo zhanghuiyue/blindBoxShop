@@ -19,4 +19,7 @@ public class BlindBoxCategoryDTO {
 
     @ApiModelProperty(value = "盲盒的标签")
     private String label;
+
+    @ApiModelProperty(value = "价格")
+    private Double price;
 }

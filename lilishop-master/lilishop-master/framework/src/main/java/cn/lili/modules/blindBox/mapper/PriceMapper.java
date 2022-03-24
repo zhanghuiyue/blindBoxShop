@@ -11,6 +11,5 @@ import java.util.List;
 
 public interface PriceMapper extends BaseMapper<Price> {
 
-    @Select("SELECT price，original_price, num,name,blind_box_category FROM li_price where blind_box_category=#{blindBoxCategoryId} ")
-    List<Price> queryPriceList(@Param("blindBoxCategoryId") String blindBoxCategoryId);
+
 }

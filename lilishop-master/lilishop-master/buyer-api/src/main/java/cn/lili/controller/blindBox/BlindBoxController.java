@@ -26,7 +26,7 @@ import java.util.Objects;
  */
 @RestController
 @Api(tags = "盲盒查询接口")
-@RequestMapping("/blindBox")
+@RequestMapping("/buyer/blindBox")
 public class BlindBoxController {
 
     @Autowired
@@ -69,6 +69,10 @@ public class BlindBoxController {
         return ResultUtil.data(blindBoxService.blindBoxExtract(extractParam));
     }
 
-
+    @ApiOperation(value = "搜索页盲盒列表查询")
+    @PostMapping(value = "/search/list", consumes = "application/json", produces = "application/json")
+    public ResultMessage<BlindBoxCategoryVO> queryBlindBoxList(@RequestBody BlindBoxCategorySearchParam blindBoxCategorySearchParam) {
+        return ResultUtil.data(blindBoxService.queryBlindBoxList(blindBoxCategorySearchParam));
+    }
 
 }

@@ -1,6 +1,7 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
@@ -11,44 +12,59 @@ import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import java.text.DecimalFormat;
 import java.util.*;
 
+/**
+ * 盲盒价格业务层
+ */
 @Service
 public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> implements BlindBoxPriceService {
+
     @Autowired
     private MemberCouponService memberCouponService;
+
+    /**
+     * 查询盲盒价格
+     * @param memberId 会员编号
+     * @param categoryId 分类编号
+     * @return BlindBoxPriceVO
+     */
     @Override
     public BlindBoxPriceVO queryPriceByCategory(String memberId, String categoryId) {
         BlindBoxPriceVO blindBoxPriceVO = new BlindBoxPriceVO();
         List<BlindBoxPriceDTO> blindBoxPriceDTOList = new ArrayList<>();
         List<BlindBoxCouponDTO> canUseCouponList = new ArrayList<>();
         List<BlindBoxCouponDTO> unUseCouponList = new ArrayList<>();
-        List<Price> priceList = this.baseMapper.queryPriceList(categoryId);
+        LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Price::getBlindBoxCategory,categoryId);
+        List<Price> priceList = this.baseMapper.selectList(queryWrapper);
         List<MemberCoupon> canUseCoupons = null;
         List<MemberCoupon> unUsedCoupons = null;
         for (Price price:priceList) {
             BlindBoxPriceDTO blindBoxPriceDTO = new BlindBoxPriceDTO();
-            if(price.getNum()==0){
+            if(price.getNum()==1){
                 canUseCoupons = memberCouponService.getBlidBoxCanUseCoupon(memberId,price.getPrice());
                 if(!CollectionUtils.isEmpty(canUseCoupons)){
-                    canUseCoupons.sort((MemberCoupon o1, MemberCoupon o2) -> {
+                                     canUseCoupons.sort((MemberCoupon o1, MemberCoupon o2) -> {
                         if (o1.getPrice()> o2.getPrice()) {
                             return 1;
                         } else {
                             return -1;
                         }
                     });
-                    blindBoxPriceDTO.setDiscount(canUseCoupons.get(0).getPrice());
+                    blindBoxPriceDTO.setDiscount(canUseCoupons.get(0).getPrice()<0?0.00:canUseCoupons.get(0).getPrice());
                     unUsedCoupons = memberCouponService.getBlidBoxUnUseCoupon(memberId,price.getPrice());
                 }
             }else {
-                blindBoxPriceDTO.setDiscount(price.getPrice()-price.getOriginalPrice());
+                blindBoxPriceDTO.setDiscount(price.getOriginalPrice()-price.getPrice());
             }
             BeanUtil.copyProperties(price, blindBoxPriceDTO);
             blindBoxPriceDTOList.add(blindBoxPriceDTO);
@@ -65,7 +81,7 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
             for (MemberCoupon useMemberCoupon : unUsedCoupons) {
                 BlindBoxCouponDTO blindBoxCouponDTO = new BlindBoxCouponDTO();
                 BeanUtil.copyProperties(useMemberCoupon, blindBoxCouponDTO);
-                canUseCouponList.add(blindBoxCouponDTO);
+                unUseCouponList.add(blindBoxCouponDTO);
             }
         }
         blindBoxPriceVO.canUseCouponList = canUseCouponList;

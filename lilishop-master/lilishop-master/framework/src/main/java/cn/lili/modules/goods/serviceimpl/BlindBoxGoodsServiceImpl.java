@@ -31,4 +31,10 @@ public class BlindBoxGoodsServiceImpl extends ServiceImpl<BlindBoxGoodsMapper, B
 
         return this.baseMapper.selectBatchIds(goodsId);
     }
+
+    @Override
+    public BlindBoxGoods queryProductDetails(String goodsId) {
+
+        return this.baseMapper.selectById(goodsId);
+    }
 }
