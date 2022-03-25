@@ -45,9 +45,9 @@ public class BlindBoxController {
     }
 
 
-    @ApiOperation(value = "分页获取商品列表")
+    @ApiOperation(value = "分页获取盲盒列表")
     @GetMapping(value = "/getByPage")
-    public ResultMessage<IPage<BlindBoxCategory>> getSkuByPage(BoxSearchParams boxSearchParams) {
+    public ResultMessage<IPage<BlindBoxCategory>> getBoxByPage(BoxSearchParams boxSearchParams) {
         return ResultUtil.data(blindBoxService.getBlindBoxCategoryByPage(boxSearchParams));
     }
 }
