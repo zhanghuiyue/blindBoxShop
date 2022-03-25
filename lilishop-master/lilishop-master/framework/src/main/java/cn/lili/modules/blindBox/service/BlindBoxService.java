@@ -1,9 +1,11 @@
 package cn.lili.modules.blindBox.service;
 
 import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
+import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.order.order.entity.dos.BlindBoxOrder;
 import cn.lili.modules.order.order.entity.dos.Trade;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -24,4 +26,6 @@ public interface BlindBoxService extends IService<BlindBoxCategory> {
     BlindBoxGoodsVO blindBoxExtract(ExtractParam extractParam);
 
     BlindBoxCategoryVO queryBlindBoxList(BlindBoxCategorySearchParam blindBoxCategorySearchPara);
+
+    IPage<BlindBoxCategory> getBlindBoxCategoryByPage(BoxSearchParams boxSearchParams);
 }
