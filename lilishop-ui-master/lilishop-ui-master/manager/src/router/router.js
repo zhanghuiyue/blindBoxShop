@@ -272,6 +272,19 @@ export const otherRouter = {
       component: () => import("@/views/sys/message/smsSign.vue")
     },
     {
+      path: "/blind-box/box-recommend/seckill/seckill-add",
+      title: "编辑秒杀活动",
+      name: "box-seckill-add",
+      component: () => import("@/views/blind-box/box-recommend/seckill/seckill-add.vue")
+    },
+    {
+      path: "/blind-box/box-recommend/seckill/seckill-box",
+      title: "秒杀盲盒",
+      name: "box-seckill-goods",
+      component: () => import("@/views/blind-box/box-recommend/seckill/seckill-box.vue")
+    },
+
+    {
       path: "live-detail",
       title: "查看直播",
       name: "live-detail",

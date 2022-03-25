@@ -3,23 +3,29 @@
     <template v-if="flag">
       <goodsDialog @selected="(val) => {goodsData = val;}"
         v-if="goodsFlag" ref="goodsDialog" :selectedWay='goodsData'/>
-      <linkDialog @selectedLink="(val) => { linkData = val; }" v-else class="linkDialog" />
+      <linkDialog @selectedLink="(val) => { linkData = val; }" v-if="linkFlag" class="linkDialog" />
+      <boxDialog @selectedBoxData="(val) => { boxData = val; }" v-if="boxFlag" ref="boxDialog" :selectedWay='boxData' />
     </template>
   </Modal>
 </template>
 <script>
 import goodsDialog from "./goods-dialog";
 import linkDialog from "./link-dialog";
+import boxDialog from "./box-dialog";
 export default {
   components: {
     goodsDialog,
-    linkDialog
+    linkDialog,
+    boxDialog
   },
   data() {
     return {
       goodsFlag: false, // 是否商品选择器
       goodsData: [], //选择的商品
       linkData: "", //选择的链接
+      linkFlag: false, // 是否链接选择器
+      boxData: [], //选择的盲盒
+      boxFlag: false, // 是否盲盒选择器
       flag: false, // modal显隐
     };
   },
@@ -28,6 +34,7 @@ export default {
     clickClose() {
       this.$emit("closeFlag", false);
       this.goodsFlag = false;
+      this.boxFlag = false;
     },
     // 单选商品
     singleGoods() {
@@ -42,21 +49,34 @@ export default {
     clickOK() {
       if (this.goodsFlag) {
         this.$emit("selectedGoodsData", this.goodsData);
-      } else {
+      }else if(this.boxFlag) {
+
+        this.$emit("selectedBoxData", this.boxData);
+      }else {
         this.$emit("selectedLink", this.linkData);
       }
       this.clickClose();
     },
     // 打开组件方法
     open(type, mutiple) {
+
       this.flag = true;
       if (type == "goods") {
         this.goodsFlag = true;
+        this.linkFlag=false ;
+        this.boxFlag =false;
         if (mutiple) {
           this.singleGoods()
         }
-      } else {
+      } else if(type == "box") {
+        this.boxFlag = true;
+        this.linkFlag=false ;
         this.goodsFlag = false;
+      }else{
+        this.linkFlag=true ;
+        this.boxFlag = false;
+        this.goodsFlag = false;
+
       }
 
     },
