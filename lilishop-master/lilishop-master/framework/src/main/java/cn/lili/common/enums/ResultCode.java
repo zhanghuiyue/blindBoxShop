@@ -461,14 +461,15 @@ public enum ResultCode {
 
     /**
      *
-     *盲盒
+     *盲盒banner
      */
-    BANNER_UPDATE_ERROR(114002, "banner修改失败"),
+    BANNER_UPDATE_ERROR(114001, "banner修改失败"),
     BANNER_DISABLE_ERROR(114002, "banner禁用失败"),
-    BANNER_SAVE_ERROR(14001, "banner添加失败"),
-    BANNER_DELETE_ERROR(14004, "banner删除失败"),
-    BANNER_NAME_EXIST_ERROR(20002, "banner名称重复！"),
-    BANNER_NOT_EXIST(20004, "banner不存在"),
+    BANNER_SAVE_ERROR(114003, "banner添加失败"),
+    BANNER_DELETE_ERROR(114004, "banner删除失败"),
+    BANNER_NAME_EXIST_ERROR(114005, "banner名称重复！"),
+    BANNER_NOT_EXIST(114006, "banner不存在"),
+    BOX_ACTIVITY_ERROR(114007, "当前秒杀活动不存在"),
 
     /**
      * 其他
@@ -482,8 +483,10 @@ public enum ResultCode {
     INDEX_BUILDING(90005, "索引正在生成"),
 
 
-    SECKILL_BOX_SAVE_ERROR(45006, "该盲盒秒杀活动添加失败"),
-
+    SECKILL_BOX_SAVE_ERROR(90016, "该盲盒秒杀活动添加失败"),
+    SECKILL_BOX_NOT_EXIST_ERROR(90017, "当前参与的秒杀活动不存在！"),
+    SECKILL_BOX_PRICE_ERROR(90018, "盲盒活动价格不能大于商品原价"),
+    SECKILL_BOX_TIME_ERROR(90018, "时刻参数异常"),
     /**
      * 订单
      */
