@@ -24,7 +24,9 @@ import cn.lili.modules.goods.service.BlindBoxGoodsService;
 import cn.lili.modules.order.order.entity.dos.BlindBoxOrder;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.Trade;
+import cn.lili.modules.order.order.entity.enums.ExtractStatusEnum;
 import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
+import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.BlindBoxOrderService;
 import cn.lili.modules.order.order.service.OrderService;
 import cn.lili.modules.order.order.service.TradeService;
@@ -36,6 +38,7 @@ import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 盲盒相关业务层实现
@@ -73,6 +77,11 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         return this.baseMapper.selectList(queryWrapper);
     }
 
+    /**
+     * 盲盒下单
+     * @param orderParam 订单相关参数
+     * @return BlindBoxOrder
+     */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BlindBoxOrder createOrder(OrderParam orderParam) {
@@ -82,49 +91,61 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         order.setMemberId(currentUser.getId());
         order.setMemberName(currentUser.getUsername());
         order.setSn(SnowFlake.getIdStr());
-        orderService.createOrder(order);
         //修改优惠卷状态
         if(StringUtils.isNotBlank(orderParam.getCouponId())) {
+            order.setCouponId(orderParam.getCouponId());
             //检验优惠券是否过期，是否被使用
-            MemberCouponSearchParams searchParams = new MemberCouponSearchParams();
-            searchParams.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
-            searchParams.setMemberId(currentUser.getId());
-            searchParams.setId(orderParam.getCouponId());
-            searchParams.setEndTime(System.currentTimeMillis());
-            MemberCoupon memberCoupon = memberCouponService.getMemberCoupon(searchParams);
+            LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<MemberCoupon>();
+            queryWrapper.eq(MemberCoupon::getMemberId,currentUser.getId());
+            queryWrapper.eq(MemberCoupon::getCouponId,orderParam.getCouponId());
+            queryWrapper.eq(MemberCoupon::getMemberCouponStatus,MemberCouponStatusEnum.NEW.name());
+            queryWrapper.ge(MemberCoupon::getEndTime,new Date());
+            MemberCoupon memberCoupon = memberCouponService.getOne(queryWrapper);
             if (memberCoupon == null) {
                 throw new ServiceException(ResultCode.COUPON_EXPIRED);
             }
             memberCouponService.updateMemberCouponByCouponId(currentUser.getId(), orderParam.getCouponId());
         }
+        orderService.createOrder(order);
         return order;
     }
 
     @Override
     public BlindBoxGoodsVO blindBoxExtract(ExtractParam extractParam) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         //根据订单号查询出订单
         BlindBoxOrder blindBoxOrder = orderService.queryOrder(extractParam.getSn());
         if(blindBoxOrder == null){
             throw new ServiceException(ResultCode.ORDER_NOT_EXIT_ERROR);
-        }else if(!"PAID".equals(blindBoxOrder.getPayStatus())) {
+        }else if(PayStatusEnum.UNPAID.equals(blindBoxOrder.getPayStatus())) {
             throw new ServiceException(ResultCode.ORDER_NOT_PAY_ERROR);
-        }else if("1".equals(blindBoxOrder.getExtractStatus())){
+        }else if(ExtractStatusEnum.EXTRACT.getState().equals(blindBoxOrder.getExtractStatus())){
             throw new ServiceException(ResultCode.ORDER_EXTRACT_ERROR);
         }
         //取出类型id，查询出商品列表
         List<BlindBoxGoods> blindBoxGoods = blindBoxGoodsService.queryList(blindBoxOrder.getBlindBoxCategory());
         //抽奖
         BlindBoxGoodsVO boxGoods = extract(blindBoxGoods,blindBoxOrder.getGoodsNum());
+        //修改抽取的状态
+        LambdaUpdateWrapper<BlindBoxOrder> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(BlindBoxOrder::getSn, blindBoxOrder.getSn());
+        updateWrapper.set(BlindBoxOrder::getExtractStatus, ExtractStatusEnum.EXTRACT.getState());
+        orderService.update(updateWrapper);
         //记录奖品
         LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<>();
         if (StringUtils.isNotBlank(extractParam.getBlindBoxCategory())) {
             queryWrapper.eq(BlindBoxCategory::getId, extractParam.getBlindBoxCategory());
         }
         BlindBoxCategory blindBoxCategory = this.baseMapper.selectOne(queryWrapper);
-        blindBoxPrizeService.batchAddPrize(bulidPrizeList(blindBoxGoods,blindBoxCategory));
+        blindBoxPrizeService.batchAddPrize(bulidPrizeList(blindBoxGoods,blindBoxCategory,currentUser.getId()));
         return boxGoods;
     }
 
+    /**
+     * 查询盲盒列表
+     * @param blindBoxCategorySearchPara
+     * @return
+     */
     @Override
     public BlindBoxCategoryVO queryBlindBoxList(BlindBoxCategorySearchParam blindBoxCategorySearchPara) {
         BlindBoxCategoryVO blindBoxCategoryVO = new BlindBoxCategoryVO();
@@ -146,8 +167,7 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
      * @param blindBoxCategory
      * @return
      */
-    public List<Prize> bulidPrizeList(List<BlindBoxGoods> blindBoxGoods,BlindBoxCategory blindBoxCategory){
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+    private List<Prize> bulidPrizeList(List<BlindBoxGoods> blindBoxGoods,BlindBoxCategory blindBoxCategory,String memberId){
         List<Prize> prizeList = new ArrayList<>();
         for (BlindBoxGoods boxGoods :blindBoxGoods) {
             Prize prize= new Prize();
@@ -155,7 +175,7 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
             prize.setGoodsId(boxGoods.getId());
             prize.setImage(blindBoxCategory.getImage());
             prize.setName(blindBoxCategory.getName());
-            prize.setMemberId(currentUser.getId());
+            prize.setMemberId(memberId);
             prize.setSubstitutionFlag("0");
             prize.setSubstitutionNum(0);
             prizeList.add(prize);
@@ -168,32 +188,50 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
      * @param num
      * @return
      */
-    public BlindBoxGoodsVO extract(List<BlindBoxGoods> blindBoxGoods,int num){
+    private BlindBoxGoodsVO extract(List<BlindBoxGoods> blindBoxGoods,int num){
         BlindBoxGoodsVO blindBoxGoodsVO = new BlindBoxGoodsVO();
         List<BlindBoxGoodsDTO> blindBoxGoodsDTOS = new ArrayList<>();
         Integer[] arr = new Integer[blindBoxGoods.size()];
-        for (int i=0; i<blindBoxGoods.size();i++) {
-            arr[i] = blindBoxGoods.get(i).getProbability();
+        ArrayList<Double> posibilitys= new ArrayList<>();
+        for (BlindBoxGoods boxGoods:blindBoxGoods) {
+            posibilitys.add(boxGoods.getProbability());
         }
-        Arrays.sort(arr);
-        Random random = new Random();
-        int flag = -1;
-        for(int j=0;j<=num;j++) {
-            int rn = random.nextInt(100);
-            for(int k=0;k<arr.length;k++){
-                if(rn>arr[k-1] && rn<=arr[k]){
-                    flag=k;
-                    BlindBoxGoodsDTO blindBoxGoodsDTO = new BlindBoxGoodsDTO();
-                    BeanUtil.copyProperties(blindBoxGoods.get(flag),blindBoxGoodsDTO);
-                    blindBoxGoodsDTOS.add(blindBoxGoodsDTO);
-                    break;
-                }
-            }
+        for(int j=0;j<num;j++) {
+            BlindBoxGoodsDTO blindBoxGoodsDTO = new BlindBoxGoodsDTO();
+            BeanUtil.copyProperties(blindBoxGoods.get(lottery(posibilitys)),blindBoxGoodsDTO);
+            blindBoxGoodsDTOS.add(blindBoxGoodsDTO);
         }
         blindBoxGoodsVO.setBlindBoxGoodsDTOS(blindBoxGoodsDTOS);
         return blindBoxGoodsVO;
     }
 
+    private int lottery(List<Double> orignalRates) {
+        if (orignalRates == null || orignalRates.isEmpty()) {
+            return -1;
+        }
+        int size = orignalRates.size();
+
+        // 计算总概率，这样可以保证不一定总概率是1
+        double sumRate = 0d;
+        for (double rate : orignalRates) {
+            sumRate += rate;
+        }
+
+        // 计算每个物品在总概率的基础下的概率情况
+        List<Double> sortOrignalRates = new ArrayList<>(size);
+        Double tempSumRate = 0d;
+        for (double rate : orignalRates) {
+            tempSumRate += rate;
+            sortOrignalRates.add(tempSumRate / sumRate);
+        }
+
+        // 根据区块值来获取抽取到的物品索引
+        ThreadLocalRandom threadLocalRandom = ThreadLocalRandom.current();
+        double random =threadLocalRandom.nextDouble(0,1);
+        sortOrignalRates.add(random);
+        Collections.sort(sortOrignalRates);
+        return sortOrignalRates.indexOf(random);
+    }
     @Override
     public IPage<BlindBoxCategory> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
         return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());

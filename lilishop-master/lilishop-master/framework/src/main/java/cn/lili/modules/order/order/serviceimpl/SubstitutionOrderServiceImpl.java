@@ -32,16 +32,16 @@ public class SubstitutionOrderServiceImpl extends ServiceImpl<SubstitutionOrderM
     @Override
     public SubstitutionOrderSimpleVO querySubstitutionOrder(SubstitutionOrderSearchParams substitutionOrderSearchParams) {
         QueryWrapper queryWrapper = substitutionOrderSearchParams.queryWrapper();
-        IPage<SubstitutionOrderDTO> substitutionOrderDTOIPage = this.baseMapper.queryAllOrder(PageUtil.initPage(substitutionOrderSearchParams),queryWrapper);
+        IPage<SubstitutionOrder> substitutionOrderDTOIPage = this.baseMapper.selectPage(PageUtil.initPage(substitutionOrderSearchParams),queryWrapper);
 
         SubstitutionOrderSimpleVO substitutionOrderSimpleVO = new SubstitutionOrderSimpleVO();
         substitutionOrderSimpleVO.setCurrentPage(substitutionOrderDTOIPage.getCurrent());
         substitutionOrderSimpleVO.setPages(substitutionOrderDTOIPage.getPages());
         substitutionOrderSimpleVO.setTotal(substitutionOrderDTOIPage.getTotal());
-        List<SubstitutionOrderDTO> substitutionOrderList = substitutionOrderDTOIPage.getRecords();
+        List<SubstitutionOrder> substitutionOrderList = substitutionOrderDTOIPage.getRecords();
         List<String> substitutionIdList = new ArrayList<>();
-        for (SubstitutionOrderDTO substitutionOrderDTO :substitutionOrderList) {
-            String goodIdPath = substitutionOrderDTO.getGoodsIdPath();
+        for (SubstitutionOrder substitutionOrder :substitutionOrderList) {
+            String goodIdPath = substitutionOrder.getGoodsIdPath();
             String [] goodIdPaths = goodIdPath.split(",");
             for (String goodId:goodIdPaths) {
                 substitutionIdList.add(goodId);
@@ -52,9 +52,12 @@ public class SubstitutionOrderServiceImpl extends ServiceImpl<SubstitutionOrderM
         for (BlindBoxGoods boxGoods:blindBoxGoods) {
             blindBoxGoodsMap.put(boxGoods.getId(),boxGoods);
         }
-        for (SubstitutionOrderDTO substitutionOrderDTO:substitutionOrderList) {
+        List<SubstitutionOrderDTO> substitutionOrderDTOList = new ArrayList<>();
+        for (SubstitutionOrder substitutionOrder:substitutionOrderList) {
+            SubstitutionOrderDTO substitutionOrderDTO = new SubstitutionOrderDTO();
+            BeanUtil.copyProperties(substitutionOrder,substitutionOrderDTO);
             List<SubstitutionGoodsDTO> substitutionGoodsDTOList = new ArrayList<>();
-            String [] goodIdPaths = substitutionOrderDTO.getGoodsIdPath().split(",");
+            String [] goodIdPaths = substitutionOrder.getGoodsIdPath().split(",");
             for (String goodId:goodIdPaths) {
                 SubstitutionGoodsDTO substitutionGoodsDTO = new SubstitutionGoodsDTO();
                 BlindBoxGoods boxGoods = blindBoxGoodsMap.get(goodId);
@@ -62,8 +65,9 @@ public class SubstitutionOrderServiceImpl extends ServiceImpl<SubstitutionOrderM
                 substitutionGoodsDTOList.add(substitutionGoodsDTO);
             }
             substitutionOrderDTO.setSubstitutionGoodsDTOList(substitutionGoodsDTOList);
+            substitutionOrderDTOList.add(substitutionOrderDTO);
         }
-        substitutionOrderSimpleVO.setSubstitutionOrderDTOList(substitutionOrderList);
+        substitutionOrderSimpleVO.setSubstitutionOrderDTOList(substitutionOrderDTOList);
         return substitutionOrderSimpleVO;
     }
 }

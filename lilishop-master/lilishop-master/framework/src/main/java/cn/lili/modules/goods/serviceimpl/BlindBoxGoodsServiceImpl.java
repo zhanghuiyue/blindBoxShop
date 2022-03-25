@@ -15,6 +15,11 @@ import java.util.List;
 @Service
 public class BlindBoxGoodsServiceImpl extends ServiceImpl<BlindBoxGoodsMapper, BlindBoxGoods> implements BlindBoxGoodsService {
 
+    /**
+     * 查询盲盒商品列表
+     * @param categoryId
+     * @return
+     */
     @Override
     public List<BlindBoxGoods> queryList(String categoryId) {
         QueryWrapper<BlindBoxGoods> queryWrapper = new QueryWrapper<>();
@@ -22,19 +27,26 @@ public class BlindBoxGoodsServiceImpl extends ServiceImpl<BlindBoxGoodsMapper, B
             queryWrapper.eq("blind_box_category",categoryId);
         }
         queryWrapper.eq("auth_flag", "PASS");
-        queryWrapper.gt("quantity","0");
         return this.baseMapper.selectList(queryWrapper);
     }
 
+    /**
+     * 批量查询盲盒商品
+     * @param goodsId
+     * @return List<BlindBoxGoods>
+     */
     @Override
     public List<BlindBoxGoods> batchQueryById(List<String> goodsId) {
-
         return this.baseMapper.selectBatchIds(goodsId);
     }
 
+    /**
+     * 查询商品详情
+     * @param goodsId 商品编号
+     * @return BlindBoxGoods
+     */
     @Override
     public BlindBoxGoods queryProductDetails(String goodsId) {
-
         return this.baseMapper.selectById(goodsId);
     }
 }

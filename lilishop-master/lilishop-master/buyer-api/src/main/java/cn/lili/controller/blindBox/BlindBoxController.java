@@ -14,6 +14,7 @@ import cn.lili.modules.blindBox.service.BlindBoxService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -57,7 +58,7 @@ public class BlindBoxController {
     }
 
     @PreventDuplicateSubmissions
-    @ApiOperation(value = "创建交易")
+    @ApiOperation(value = "创建订单")
     @PostMapping(value = "/create/order", consumes = "application/json", produces = "application/json")
     public ResultMessage<Object> createOrder(@RequestBody OrderParam orderParam) {
         return ResultUtil.data(blindBoxService.createOrder(orderParam));

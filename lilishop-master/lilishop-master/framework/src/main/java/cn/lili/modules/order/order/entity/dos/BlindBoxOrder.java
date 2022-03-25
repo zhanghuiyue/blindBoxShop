@@ -30,9 +30,6 @@ public class BlindBoxOrder extends BaseEntity {
     @ApiModelProperty("订单编号")
     private String sn;
 
-    @ApiModelProperty("交易编号 关联Trade")
-    private String tradeSn;
-
     @ApiModelProperty(value = "种类id")
     private String blindBoxCategory;
 
@@ -96,6 +93,8 @@ public class BlindBoxOrder extends BaseEntity {
     @ApiModelProperty(value = "优惠券id")
     private String couponId;
 
+    @ApiModelProperty(value = "购买方式")
+    private String buyWay;
 
     public BlindBoxOrder(OrderParam orderParam) {
         String oldId = this.getId();
@@ -105,5 +104,7 @@ public class BlindBoxOrder extends BaseEntity {
         //设置默认支付状态
         this.setOrderStatus(OrderStatusEnum.UNPAID.name());
         this.setPayStatus(PayStatusEnum.UNPAID.name());
+        this.setExtractStatus(ExtractStatusEnum.UNEXTRACT.getState());
+        this.setBuyWay(BuyWayEnum.CASH.name());
     }
 }

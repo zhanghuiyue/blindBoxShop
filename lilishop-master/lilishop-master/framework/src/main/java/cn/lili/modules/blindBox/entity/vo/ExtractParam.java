@@ -18,7 +18,5 @@ public class ExtractParam {
     @ApiModelProperty(value = "种类id")
     private String blindBoxCategory;
 
-    @ApiModelProperty(value = "盲盒名称")
-    private String name;
 
 }

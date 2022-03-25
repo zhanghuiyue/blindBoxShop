@@ -9,8 +9,10 @@ CREATE TABLE `li_price` (
   `price` DOUBLE(10,2) DEFAULT NULL COMMENT '价格',
   `original_price` DOUBLE(10,2) DEFAULT NULL COMMENT '原价',
   `num` INT DEFAULT NULL COMMENT '数量',
+  `name` VARCHAR(255) DEFAULT NULL COMMENT '价格名称',
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE li_prize
@@ -24,8 +26,9 @@ CREATE TABLE `li_prize` (
   `goods_id` VARCHAR(255) DEFAULT NULL COMMENT '商品ID',
   `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员ID',
   `substitution_flag` char(1) DEFAULT NULL COMMENT '置换标识，0表示未置换，1表示已置换',
-  `substitution_num` INT DEFAULT NULL COMMENT '置换次数'
+  `substitution_num` INT DEFAULT NULL COMMENT '置换次数',
   `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
+	`blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -33,6 +36,7 @@ CREATE TABLE `li_prize` (
 ALTER TABLE li_goods ADD substitution_flag CHAR(1) COMMENT '1表示置换，0表示奖品';
 ALTER TABLE li_goods_sku ADD probability FLOAT(10,2) COMMENT '中奖概率';
 
+drop table li_blind_box_category
 CREATE TABLE `li_blind_box_category` (
   `id` BIGINT NOT NULL COMMENT 'ID',
   `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
@@ -44,6 +48,7 @@ CREATE TABLE `li_blind_box_category` (
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   `sort_order` INT DEFAULT NULL COMMENT '排序值',
   `label` VARCHAR(255) DEFAULT NULL COMMENT '盲盒的标签',
+  `price` DOUBLE(10,2) DEFAULT NULL COMMENT '价格',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -58,6 +63,7 @@ CREATE TABLE `li_blind_box_goods` (
   `auth_message` INT DEFAULT NULL COMMENT '审核信息',
   `goods_name` VARCHAR(255) DEFAULT NULL COMMENT '商品名称',
   `logo` VARCHAR(255)  DEFAULT NULL COMMENT '品牌图标',
+  `brand_intro` VARCHAR(255)  DEFAULT NULL COMMENT '品牌介绍',
   `name` VARCHAR(255)  DEFAULT NULL COMMENT '品牌名称',
   `goods_unit` VARCHAR(20) DEFAULT NULL COMMENT '计量单位',
   `intro` MEDIUMTEXT DEFAULT NULL COMMENT '商品详情',
@@ -67,7 +73,7 @@ CREATE TABLE `li_blind_box_goods` (
   `big` VARCHAR(255)  DEFAULT NULL COMMENT '大图路径',
   `quantity` INT DEFAULT NULL COMMENT '库存',
   `specs` VARCHAR(255)  DEFAULT NULL COMMENT '规格信息',
-  `probability` INT COMMENT '中奖概率',
+  `probability`DOUBLE(10,2) DEFAULT NULL COMMENT '中奖概率',
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -87,6 +93,7 @@ CREATE TABLE `li_blind_box_order` (
   `complete_time` DATETIME(6) DEFAULT NULL COMMENT '完成时间',
   `discount_price` DOUBLE(10,2) DEFAULT NULL COMMENT '优惠的金额',
   `flow_price` VARCHAR(255) DEFAULT NULL COMMENT '总价格',
+  `goods_price` DOUBLE(10,2) DEFAULT NULL COMMENT '商品价格',
   `goods_num` INT DEFAULT NULL COMMENT '商品数量',
   `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员ID',
   `member_name` VARCHAR(255) DEFAULT NULL COMMENT '用户名',
@@ -100,6 +107,7 @@ CREATE TABLE `li_blind_box_order` (
   `receivable_no` VARCHAR(255) DEFAULT NULL COMMENT '第三方付款流水号',
   `name` VARCHAR(255) COMMENT '盲盒名称',
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `buy_way` VARCHAR(255) COMMENT '购买方式',
   `extract_status` VARCHAR(1) DEFAULT NULL COMMENT '抽取的状态，0表示未抽取，1表示已抽取',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
