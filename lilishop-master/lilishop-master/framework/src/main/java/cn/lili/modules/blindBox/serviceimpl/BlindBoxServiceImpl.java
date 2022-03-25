@@ -13,6 +13,7 @@ import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Prize;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
+import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
@@ -31,9 +32,11 @@ import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -190,5 +193,11 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         blindBoxGoodsVO.setBlindBoxGoodsDTOS(blindBoxGoodsDTOS);
         return blindBoxGoodsVO;
     }
+
+    @Override
+    public IPage<BlindBoxCategory> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
+        return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
+    }
+
 
 }
