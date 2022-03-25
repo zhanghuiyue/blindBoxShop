@@ -17,4 +17,6 @@ public class BlindBoxPriceDTO {
     @ApiModelProperty(value = "数量")
     private Integer num;
 
+    @ApiModelProperty(value = "价格名称")
+    private String name;
 }

@@ -27,6 +27,9 @@ public class BlindBoxGoods extends BaseIdEntity {
     @ApiModelProperty(value = "品牌名称")
     private String name;
 
+    @ApiModelProperty(value = "品牌介绍")
+    private String brandIntro;
+
     @ApiModelProperty(value = "计量单位")
     private String goodsUnit;
 

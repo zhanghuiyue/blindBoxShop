@@ -30,4 +30,7 @@ public class Price extends BaseEntity {
     @ApiModelProperty(value = "种类id")
     private String blindBoxCategory;
 
+    @ApiModelProperty(value = "价格名称")
+    private String name;
+
 }

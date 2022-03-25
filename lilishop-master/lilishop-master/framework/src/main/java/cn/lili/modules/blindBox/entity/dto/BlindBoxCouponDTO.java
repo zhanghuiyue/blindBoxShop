@@ -9,9 +9,6 @@ public class BlindBoxCouponDTO {
     @ApiModelProperty(value = "面额")
     private Double price;
 
-    @ApiModelProperty(value = "折扣")
-    private Double discount;
-
     @ApiModelProperty(value = "消费门槛")
     private Double consumeThreshold;
 

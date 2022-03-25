@@ -29,4 +29,7 @@ public class BlindBoxCategory extends BaseEntity {
     @ApiModelProperty(value = "盲盒的标签")
     private String label;
 
+    @ApiModelProperty(value = "价格")
+    private Double price;
+
 }

@@ -11,10 +11,9 @@ import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.blindBox.entity.dos.Banner;
 import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Prize;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
-import cn.lili.modules.blindBox.entity.vo.BlindBoxGoodsVO;
-import cn.lili.modules.blindBox.entity.vo.ExtractParam;
-import cn.lili.modules.blindBox.entity.vo.OrderParam;
+import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
@@ -42,6 +41,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+/**
+ * 盲盒相关业务层实现
+ */
 @Service
 public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,BlindBoxCategory> implements BlindBoxService {
 
@@ -57,9 +59,15 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
     @Autowired
     private BlindBoxPrizeService blindBoxPrizeService;
 
+    /**
+     * 盲盒列表查询
+     * @return List<BlindBoxCategory>
+     */
     @Override
     public List<BlindBoxCategory> queryBlindBoxCategoryList() {
-        return this.baseMapper.queryBlindBoxCategoryList();
+        LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByAsc(BlindBoxCategory::getSortOrder);
+        return this.baseMapper.selectList(queryWrapper);
     }
 
     @Override
@@ -71,7 +79,6 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         order.setMemberId(currentUser.getId());
         order.setMemberName(currentUser.getUsername());
         order.setSn(SnowFlake.getIdStr());
-        order.setOrderStatus("0");
         orderService.createOrder(order);
         //修改优惠卷状态
         if(StringUtils.isNotBlank(orderParam.getCouponId())) {
@@ -113,6 +120,21 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         BlindBoxCategory blindBoxCategory = this.baseMapper.selectOne(queryWrapper);
         blindBoxPrizeService.batchAddPrize(bulidPrizeList(blindBoxGoods,blindBoxCategory));
         return boxGoods;
+    }
+
+    @Override
+    public BlindBoxCategoryVO queryBlindBoxList(BlindBoxCategorySearchParam blindBoxCategorySearchPara) {
+        BlindBoxCategoryVO blindBoxCategoryVO = new BlindBoxCategoryVO();
+        QueryWrapper queryWrapper = blindBoxCategorySearchPara.queryWrapper();
+        List<BlindBoxCategory> blindBoxCategoryList = this.baseMapper.selectList(queryWrapper);
+        List<BlindBoxCategoryDTO> blindBoxCategoryDTOList = new ArrayList<>();
+        for (BlindBoxCategory blindBoxCategory:blindBoxCategoryList) {
+            BlindBoxCategoryDTO blindBoxCategoryDTO = new BlindBoxCategoryDTO();
+            BeanUtil.copyProperties(blindBoxCategory,blindBoxCategoryDTO);
+            blindBoxCategoryDTOList.add(blindBoxCategoryDTO);
+        }
+        blindBoxCategoryVO.setBlindBoxCategoryDTOList(blindBoxCategoryDTOList);
+        return blindBoxCategoryVO;
     }
 
     /**

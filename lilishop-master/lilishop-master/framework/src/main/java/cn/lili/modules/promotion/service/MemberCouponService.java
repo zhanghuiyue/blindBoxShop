@@ -144,7 +144,6 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     /**
      * 获取不可用盲盒优惠券
      * @param memberId
-     * @param totalPrice
      * @return
      */
     List<MemberCoupon> getBlidBoxUnUseCoupon(String memberId, Double totalPrice);

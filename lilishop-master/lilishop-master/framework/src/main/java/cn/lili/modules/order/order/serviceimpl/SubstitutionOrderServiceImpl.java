@@ -16,6 +16,7 @@ import cn.lili.modules.order.order.service.BlindBoxOrderService;
 import cn.lili.modules.order.order.service.SubstitutionOrderService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +31,9 @@ public class SubstitutionOrderServiceImpl extends ServiceImpl<SubstitutionOrderM
     private BlindBoxGoodsService blindBoxGoodsService;
     @Override
     public SubstitutionOrderSimpleVO querySubstitutionOrder(SubstitutionOrderSearchParams substitutionOrderSearchParams) {
-        IPage<SubstitutionOrderDTO> substitutionOrderDTOIPage = null;
-        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
-        if("ALL".equals(substitutionOrderSearchParams.getOrderStatus())){
-            substitutionOrderDTOIPage = this.baseMapper.queryAllOrder(currentUser.getId());
-        }else {
-            substitutionOrderDTOIPage = this.baseMapper.queryOrderByOrderStatus(currentUser.getId(),substitutionOrderSearchParams.getOrderStatus());
-        }
+        QueryWrapper queryWrapper = substitutionOrderSearchParams.queryWrapper();
+        IPage<SubstitutionOrderDTO> substitutionOrderDTOIPage = this.baseMapper.queryAllOrder(PageUtil.initPage(substitutionOrderSearchParams),queryWrapper);
+
         SubstitutionOrderSimpleVO substitutionOrderSimpleVO = new SubstitutionOrderSimpleVO();
         substitutionOrderSimpleVO.setCurrentPage(substitutionOrderDTOIPage.getCurrent());
         substitutionOrderSimpleVO.setPages(substitutionOrderDTOIPage.getPages());
