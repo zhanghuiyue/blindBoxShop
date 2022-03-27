@@ -27,6 +27,6 @@ public class BoxSeckillTimelineVO implements Serializable {
     private Long distanceStartTime;
 
     @ApiModelProperty(value = "本组活动内的秒杀活动商品列表")
-    private List<BoxSeckillBoxVO> seckillGoodsList;
+    private List<BoxSeckillBoxVO> seckillBoxList;
 
 }
