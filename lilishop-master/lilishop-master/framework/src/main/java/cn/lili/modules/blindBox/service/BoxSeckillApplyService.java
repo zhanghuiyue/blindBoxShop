@@ -5,6 +5,8 @@ import cn.lili.modules.blindBox.entity.dos.BoxSeckillApply;
 
 import cn.lili.modules.blindBox.entity.dto.search.SeckillBoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.BoxSeckillApplyVO;
+import cn.lili.modules.blindBox.entity.vo.BoxSeckillBoxVO;
+import cn.lili.modules.blindBox.entity.vo.BoxSeckillTimelineVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -38,5 +40,23 @@ public interface BoxSeckillApplyService extends IService<BoxSeckillApply> {
      * @return 限时请购申请列表
      */
     IPage<BoxSeckillApply> getBoxSeckillApplyPage(SeckillBoxSearchParams queryParam, PageVO pageVo);
+
+
+
+    /**
+     * 获取当天秒杀活动信息列表（时刻及对应时刻下的盲盒）
+     *
+     * @return 秒杀活动信息列表
+     */
+    List<BoxSeckillTimelineVO> getBoxSeckillTimeline();
+
+
+    /**
+     * 获取当天某个时刻的秒杀活动商品列表
+     *
+     * @param timeline 指定时刻
+     * @return 秒杀活动商品列表
+     */
+    List<BoxSeckillBoxVO> getSeckillBox(Integer timeline);
 
 }
