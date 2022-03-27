@@ -22,23 +22,17 @@ public class BoxSeckillBoxVO implements Serializable {
     @ApiModelProperty(value = "时刻")
     private Integer timeLine;
 
-    @ApiModelProperty(value = "商品id")
-    private String goodsId;
+    @ApiModelProperty(value = "盲盒id")
+    private String boxId;
 
     @ApiModelProperty(value = "以积分渠道购买需要积分数量")
     private Integer point;
 
-    @ApiModelProperty(value = "skuID")
-    private String skuId;
+    @ApiModelProperty(value = "盲盒名称")
+    private String name;
 
-    @ApiModelProperty(value = "商品名称")
-    private String goodsName;
-
-    @ApiModelProperty(value = "商品图片")
-    private String goodsImage;
-
-    @ApiModelProperty(value = "商家id")
-    private String storeId;
+    @ApiModelProperty(value = "盲盒图片")
+    private String image;
 
     @ApiModelProperty(value = "价格")
     private Double price;
