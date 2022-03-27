@@ -19,14 +19,14 @@ import java.util.Objects;
 
 @RestController
 @Api(tags = "置换商品订单接口")
-@RequestMapping("/substitution/order")
+@RequestMapping("/buyer/blindBox")
 public class SubstitutionOrderController {
 
     @Autowired
     private SubstitutionOrderService substitutionOrderService;
 
     @ApiOperation(value = "查询置换商品订单列表及详情")
-    @PostMapping("/query")
+    @PostMapping("/substitution/order/query")
     public ResultMessage<SubstitutionOrderSimpleVO> querySubstitutionOrder(@RequestBody SubstitutionOrderSearchParams substitutionOrderSearchParams) {
         return ResultUtil.data(substitutionOrderService.querySubstitutionOrder(substitutionOrderSearchParams));
     }

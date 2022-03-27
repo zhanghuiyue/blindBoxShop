@@ -24,5 +24,5 @@ public class OrderParam {
     private String couponId;
 
     @ApiModelProperty(value = "盲盒的数量")
-    private String goodsNum;
+    private Integer goodsNum;
 }

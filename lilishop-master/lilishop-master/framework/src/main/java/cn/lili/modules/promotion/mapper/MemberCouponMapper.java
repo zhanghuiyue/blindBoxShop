@@ -17,7 +17,4 @@ import java.util.List;
  */
 public interface MemberCouponMapper extends BaseMapper<MemberCoupon> {
 
-    @Update("UPDATE li_member_coupon set member_coupon_status = " +"2"+
-            "  WHERE couponId = #{couponId} and memberId = #{memberId} ")
-    void updateMemberCouponByCouponId( @Param("memberId")String memberId,@Param("couponId")String couponId);
 }

@@ -40,7 +40,7 @@ public class BlindBoxGoods extends BaseIdEntity {
     private Double price;
 
     @ApiModelProperty(value = "审核状态")
-    private Double authFlag;
+    private String authFlag;
 
     @ApiModelProperty(value = "小图路径")
     private String small;
@@ -52,7 +52,7 @@ public class BlindBoxGoods extends BaseIdEntity {
     private Integer quantity;
 
     @ApiModelProperty(value = "中奖概率")
-    private Integer probability;
+    private Double probability;
 
     @ApiModelProperty(value = "种类id")
     private Float blindBoxCategory;

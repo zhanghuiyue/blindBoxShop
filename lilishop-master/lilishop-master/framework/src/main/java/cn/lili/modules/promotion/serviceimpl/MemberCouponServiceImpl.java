@@ -310,7 +310,11 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
 
     @Override
     public void updateMemberCouponByCouponId(String memberId, String couponId) {
-         this.baseMapper.updateMemberCouponByCouponId(memberId,couponId);
+        LambdaUpdateWrapper<MemberCoupon> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(MemberCoupon::getCouponId, couponId);
+        updateWrapper.eq(MemberCoupon::getMemberId,memberId);
+        updateWrapper.set(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.USED.name());
+        this.update(updateWrapper);
     }
 
 

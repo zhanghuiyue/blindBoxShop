@@ -27,14 +27,14 @@ public class SubstitutionOrderSearchParams extends PageVO {
         //关键字查询
 
         if (currentUser != null) {
-            wrapper.eq( "a.member_id", currentUser.getId());
+            wrapper.eq( "member_id", currentUser.getId());
 
         }
 
         //按标签查询
         if (CharSequenceUtil.isNotEmpty(orderStatus)) {
             if(!"ALL".equals(orderStatus)){
-                wrapper.eq( "a.order_status", orderStatus);
+                wrapper.eq( "order_status", orderStatus);
             }
         }
         return wrapper;

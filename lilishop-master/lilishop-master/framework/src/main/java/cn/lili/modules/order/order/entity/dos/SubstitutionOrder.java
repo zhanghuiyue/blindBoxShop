@@ -25,9 +25,6 @@ public class SubstitutionOrder extends BaseEntity {
     @ApiModelProperty("订单编号")
     private String sn;
 
-    @ApiModelProperty("交易编号 关联Trade")
-    private String tradeSn;
-
     @ApiModelProperty(value = "会员ID")
     private String memberId;
 
