@@ -3,7 +3,10 @@ package cn.lili.controller.blindBox;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.blindBox.entity.dos.Banner;
+import cn.lili.modules.blindBox.entity.vo.BoxSeckillBoxVO;
+import cn.lili.modules.blindBox.entity.vo.BoxSeckillTimelineVO;
 import cn.lili.modules.blindBox.service.BannerService;
+import cn.lili.modules.blindBox.service.BoxSeckillApplyService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -37,8 +40,8 @@ public class BlindBoxRecommendController {
      * 盲盒限时抢购
      *@return
      */
-  /*  @Autowired
-    private BoxSeckillService boxSeckillService ;*/
+   @Autowired
+    private BoxSeckillApplyService boxSeckillApplyService ;
 
 
     @ApiOperation(value = "获取推荐banner列表")
@@ -48,33 +51,16 @@ public class BlindBoxRecommendController {
     }
 
 
-   /* @ApiOperation(value = "获取当天盲盒秒杀信息")
-    @GetMapping
-    public ResultMessage<List<BoxSeckillTimelineVO>> getBoxSeckillTime() {
-        return ResultUtil.data(boxSeckillService.getBoxSeckillTimeline());
-    }*/
-
-  /*  @ApiOperation(value = "获取某个时刻的限时抢购商品信息")
-    @GetMapping("/seckill/{timeline}")
-    public ResultMessage<List<BoxSeckillVO>> getSeckillBox(@PathVariable Integer timeline) {
-        return ResultUtil.data(boxSeckillService.getSeckillBoxList(timeline));
+    @ApiOperation(value = "获取当天秒杀活动信息")
+    @GetMapping(value = "/seckillTime")
+    public ResultMessage<List<BoxSeckillTimelineVO>> getSeckillTime() {
+        return ResultUtil.data(boxSeckillApplyService.getBoxSeckillTimeline());
     }
 
-    @ApiOperation(value = "获取当前抢购的盲盒信息")
-    @GetMapping("/seckill/cuurentSeckill")
-    public ResultMessage<List<BoxSeckillVO>> getCuurentSeckillBox(@PathVariable Integer timeline) {
-        return ResultUtil.data(boxSeckillService.getSeckillBoxList(timeline));
+    @ApiOperation(value = "获取某个时刻的秒杀活动商品信息")
+    @GetMapping("/{timeline}")
+    public ResultMessage<List<BoxSeckillBoxVO>> getSeckillGoods(@PathVariable Integer timeline) {
+        return ResultUtil.data(boxSeckillApplyService.getSeckillBox(timeline));
     }
-*/
-    /**
-     *
-     * 当天盲盒抢购时间列表
-     *
-     */
-  /*  @ApiOperation(value = "当天盲盒抢购时间列表")
-    @GetMapping("/seckill/timeInterval")
-    public ResultMessage<List<BoxSeckillVO>> getCuurentSeckillBox(@PathVariable Integer timeline) {
-        return ResultUtil.data(boxSeckillService.getSeckillBoxList(timeline));
-    }*/
 
 }
