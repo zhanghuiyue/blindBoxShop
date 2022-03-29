@@ -125,7 +125,8 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     public IPage<CouponVO> pageVOFindAll(CouponSearchParams searchParams, PageVO page) {
         IPage<Coupon> couponIPage = super.pageFindAll(searchParams, page);
         List<CouponVO> couponVOList = couponIPage.getRecords().stream().map(CouponVO::new).collect(Collectors.toList());
-        return PageUtil.convertPage(couponIPage, couponVOList);
+        final IPage<CouponVO> couponVOIPage = PageUtil.convertPage(couponIPage, couponVOList);
+        return couponVOIPage;
     }
 
     /**

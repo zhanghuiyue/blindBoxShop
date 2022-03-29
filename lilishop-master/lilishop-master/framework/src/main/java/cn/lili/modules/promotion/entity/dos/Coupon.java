@@ -82,6 +82,15 @@ public class Coupon extends BasePromotions {
     @ApiModelProperty(value = "有效期")
     private Integer effectiveDays;
 
+    @ApiModelProperty(value = "商品类型，0表示普通商品，1表示盲盒商品")
+    private String goondsType;
+
+    @ApiModelProperty(value = "盲盒类型id")
+    private String blindBoxCategory;
+
+    @ApiModelProperty(value = "盲盒名称")
+    private String name;
+
     public Coupon(CouponVO couponVO) {
         BeanUtils.copyProperties(couponVO, this);
     }

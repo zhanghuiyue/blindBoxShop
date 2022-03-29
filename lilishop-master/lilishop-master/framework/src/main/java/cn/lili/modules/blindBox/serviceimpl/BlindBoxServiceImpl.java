@@ -16,6 +16,7 @@ import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
 import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
+import cn.lili.modules.blindBox.service.BlindBoxPriceService;
 import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
 
@@ -65,6 +66,9 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
 
     @Autowired
     private BlindBoxPrizeService blindBoxPrizeService;
+
+    @Autowired
+    private BlindBoxPriceService blindBoxPriceService;
 
     /**
      * 盲盒列表查询
@@ -235,6 +239,38 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
     @Override
     public IPage<BlindBoxCategory> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
         return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
+    }
+
+    @Override
+    public void addBlindBox(BlindBoxCategoryDTO blindBoxCategoryDTO) {
+        BlindBoxCategory blindBoxCategory = new BlindBoxCategory();
+        BeanUtil.copyProperties(blindBoxCategoryDTO,blindBoxCategory);
+        this.baseMapper.insert(blindBoxCategory);
+    }
+
+    @Override
+    public void updateBlindBox(BlindBoxCategoryDTO blindBoxCategoryDTO) {
+        BlindBoxCategory blindBoxCategory = new BlindBoxCategory();
+        BeanUtil.copyProperties(blindBoxCategoryDTO,blindBoxCategory);
+        LambdaUpdateWrapper<BlindBoxCategory> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(BlindBoxCategory::getId, blindBoxCategoryDTO.getId());
+        this.baseMapper.update(blindBoxCategory,updateWrapper);
+    }
+
+    @Override
+    @Transactional
+    public void deleteBlindBox(String id) {
+        LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<BlindBoxCategory>();
+        queryWrapper.eq(BlindBoxCategory::getId,id);
+        this.baseMapper.delete(queryWrapper);
+        blindBoxPriceService.deleteByCategoryId(id);
+    }
+
+    @Override
+    public void batchDeleteBlindBox(List<String> ids) {
+        this.baseMapper.deleteBatchIds(ids);
+        List priceIds = blindBoxPriceService.batchQuery(ids);
+        blindBoxPriceService.batchDelete(priceIds);
     }
 
 

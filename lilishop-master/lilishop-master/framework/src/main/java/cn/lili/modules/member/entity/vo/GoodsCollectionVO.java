@@ -32,4 +32,11 @@ public class GoodsCollectionVO {
 
     @ApiModelProperty(value = "已失效")
     private String marketEnable;
+
+    @ApiModelProperty(value = "元气豆数")
+    private String sinewyBeans;
+
+    @ApiModelProperty(value = "购买数量")
+    private String buyCount;
+
 }

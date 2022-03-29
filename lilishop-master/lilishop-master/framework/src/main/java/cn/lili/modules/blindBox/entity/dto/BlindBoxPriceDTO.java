@@ -5,6 +5,9 @@ import lombok.Data;
 
 @Data
 public class BlindBoxPriceDTO {
+    @ApiModelProperty(value = "id")
+    private String id;
+
     @ApiModelProperty(value = "价格")
     private Double price;
 

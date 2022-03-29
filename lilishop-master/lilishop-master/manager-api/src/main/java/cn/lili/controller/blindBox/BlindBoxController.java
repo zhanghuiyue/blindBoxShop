@@ -50,4 +50,32 @@ public class BlindBoxController {
     public ResultMessage<IPage<BlindBoxCategory>> getBoxByPage(BoxSearchParams boxSearchParams) {
         return ResultUtil.data(blindBoxService.getBlindBoxCategoryByPage(boxSearchParams));
     }
+
+    @ApiOperation(value = "添加盲盒")
+    @PostMapping(value = "/add")
+    public ResultMessage add(@RequestBody BlindBoxCategoryDTO blindBoxCategoryDTO) {
+        blindBoxService.addBlindBox(blindBoxCategoryDTO);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "更新盲盒")
+    @PutMapping(value = "/update")
+    public ResultMessage update (@RequestBody BlindBoxCategoryDTO blindBoxCategoryDTO) {
+        blindBoxService.updateBlindBox(blindBoxCategoryDTO);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "删除盲盒")
+    @PutMapping(value = "/delete/{id}")
+    public ResultMessage delete (@PathVariable String id) {
+        blindBoxService.deleteBlindBox(id);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "批量删除盲盒")
+    @PutMapping(value = "/batch/delete/{ids}")
+    public ResultMessage batchDelete (@PathVariable List<String> ids) {
+        blindBoxService.batchDeleteBlindBox(ids);
+        return ResultUtil.success();
+    }
 }

@@ -24,7 +24,7 @@ public interface GoodsCollectionMapper extends BaseMapper<GoodsCollection> {
      * @param queryWrapper 查询条件
      * @return 商品收藏VO分页
      */
-    @Select("select gc.id AS id,gs.id as sku_id,gs.goods_id as goods_id,gs.goods_name as goods_name,gs.thumbnail as image,gs.price,gs.market_enable AS market_enable from li_goods_collection gc INNER JOIN li_goods_sku gs ON gc.sku_id=gs.id    ${ew.customSqlSegment} ")
+    @Select("select gc.id AS id,gs.id as sku_id,gs.goods_id as goods_id,gs.goods_name as goods_name,gs.thumbnail as image,gs.price,gs.market_enable AS market_enable,gs.buy_count as buyCount,gs.sinewy_beans as sinewyBeans from li_goods_collection gc INNER JOIN li_goods_sku gs ON gc.sku_id=gs.id ${ew.customSqlSegment}")
     IPage<GoodsCollectionVO> goodsCollectionVOList(IPage<GoodsCollectionVO> page, @Param(Constants.WRAPPER) Wrapper<GoodsCollectionVO> queryWrapper);
 
 }

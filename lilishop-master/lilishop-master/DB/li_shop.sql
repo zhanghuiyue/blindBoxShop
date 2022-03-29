@@ -13,9 +13,9 @@ CREATE TABLE `li_price` (
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
-) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE li_prize
+
 CREATE TABLE `li_prize` (
   `id` BIGINT NOT NULL COMMENT 'ID',
   `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
@@ -32,9 +32,6 @@ CREATE TABLE `li_prize` (
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
-
-ALTER TABLE li_goods ADD substitution_flag CHAR(1) COMMENT '1表示置换，0表示奖品';
-ALTER TABLE li_goods_sku ADD probability FLOAT(10,2) COMMENT '中奖概率';
 
 drop table li_blind_box_category
 CREATE TABLE `li_blind_box_category` (
@@ -143,3 +140,10 @@ CREATE TABLE `li_substitution_order` (
 	`sku_id` VARCHAR(255) DEFAULT NULL  COMMENT '购买商品skuid',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+alter table `li_goods` add column sinewy_beans INT DEFAULT NULL COMMENT '元气豆数'
+alter table `li_goods_sku` add column sinewy_beans INT DEFAULT NULL COMMENT '元气豆数'
+alter table `li_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，盲盒商品';
+alter table `li_coupon` add column blind_box_category VARCHAR(255) DEFAULT NULL COMMENT '盲盒的种类编号';
+alter table `li_coupon` add column name VARCHAR(255) DEFAULT NULL COMMENT '盲盒名称';
+alter table `li_coupon_activity` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，盲盒商品';
