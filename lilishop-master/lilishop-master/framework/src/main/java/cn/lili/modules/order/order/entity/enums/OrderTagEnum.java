@@ -25,6 +25,11 @@ public enum OrderTagEnum {
     WAIT_SHIP("待发货"),
 
     /**
+     * 进行中
+     */
+    UNDER_WAY("进行中"),
+
+    /**
      * 待收货
      */
     WAIT_ROG("待收货"),
