@@ -32,4 +32,6 @@ public class BlindBoxGoodsController {
     public ResultMessage<BlindBoxGoods> list(@NotNull(message = "商品编号不能为空") @RequestParam String goodsId) {
         return ResultUtil.data(blindBoxGoodsService.queryProductDetails(goodsId));
     }
+
+
 }

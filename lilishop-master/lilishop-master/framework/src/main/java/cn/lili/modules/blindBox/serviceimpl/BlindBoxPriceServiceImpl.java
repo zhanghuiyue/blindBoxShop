@@ -1,6 +1,7 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.vo.PageVO;
 import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
@@ -12,7 +13,11 @@ import cn.lili.modules.goods.entity.vos.CategoryVO;
 import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.service.MemberCouponService;
+import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,5 +92,56 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
         blindBoxPriceVO.canUseCouponList = canUseCouponList;
         blindBoxPriceVO.unUseCouponList = unUseCouponList;
         return blindBoxPriceVO;
+    }
+
+    @Override
+    public IPage<Price> queryPriceByPage(PageVO pageVO) {
+        LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
+        return this.page(PageUtil.initPage(pageVO),queryWrapper);
+    }
+
+    @Override
+    public void batchAdd(List<BlindBoxPriceDTO> blindBoxPriceDTOs) {
+        List<Price> prices = new ArrayList<>();
+        for (BlindBoxPriceDTO blindBoxPriceDTO:blindBoxPriceDTOs) {
+            Price price = new Price();
+            BeanUtil.copyProperties(blindBoxPriceDTO,price);
+            prices.add(price);
+        }
+        this.saveBatch(prices);
+    }
+
+    @Override
+    public void update(BlindBoxPriceDTO blindBoxPriceDTO) {
+        Price price = new Price();
+        BeanUtil.copyProperties(blindBoxPriceDTO,price);
+        this.baseMapper.updateById(price);
+    }
+
+    @Override
+    public void deleteByCategoryId(String categoryId) {
+        LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Price::getBlindBoxCategory,categoryId);
+        this.baseMapper.delete(queryWrapper);
+    }
+
+    @Override
+    public void deleteById(String id) {
+        this.baseMapper.deleteById(id);
+    }
+
+    @Override
+     public List<String> batchQuery(List<String> categoryIds) {
+        List<Price> prices = new LambdaQueryChainWrapper<Price>(this.baseMapper).ge(Price::getBlindBoxCategory,categoryIds).list();
+        List<String> ids = new ArrayList<>();
+        for (Price price:prices) {
+            ids.add(price.getId());
+        }
+        return ids;
+    }
+
+    @Override
+    public void batchDelete(List<String> ids) {
+        this.baseMapper.deleteBatchIds(ids);
     }
 }
