@@ -89,10 +89,8 @@ public class BoxSeckillManagerController {
     @GetMapping("/apply/{seckillApplyId}")
     @ApiOperation(value = "获取秒杀活动申请")
     public ResultMessage<BoxSeckillApply> getSeckillApply(@PathVariable String seckillApplyId) {
-        System.out.println("获取秒杀申请接口："+seckillApplyId);
-        BoxSeckillApply seckillApply = OperationalJudgment.judgment(boxSeckillApplyService.getById(seckillApplyId));
 
-        System.out.println("获取秒杀申请接口2："+ResultUtil.data(seckillApply));
+        BoxSeckillApply seckillApply = OperationalJudgment.judgment(boxSeckillApplyService.getById(seckillApplyId));
         return ResultUtil.data(seckillApply);
     }
 
@@ -105,11 +103,16 @@ public class BoxSeckillManagerController {
     }
 
 
-    @GetMapping("/apply")
+    @GetMapping("/applyList/{seckillId}")
     @ApiOperation(value = "获取秒杀活动申请列表")
-    public ResultMessage<IPage<BoxSeckillApply>> getSeckillApplyPage(SeckillBoxSearchParams queryParam, PageVO pageVo) {
+    public ResultMessage<IPage<BoxSeckillApply>> getSeckillApplyPage(@PathVariable String seckillId, PageVO pageVo) {
 
-        IPage<BoxSeckillApply> boxSeckillPage = boxSeckillApplyService.getBoxSeckillApplyPage(queryParam, pageVo);
+        SeckillBoxSearchParams   seckillBoxSearchParams = new SeckillBoxSearchParams();
+        System.out.println("盲盒秒杀申请22:"+pageVo.toString());
+        System.out.println("盲盒秒杀申请111:"+seckillBoxSearchParams.toString());
+        seckillBoxSearchParams.setSeckill_id(seckillId);
+        System.out.println("盲盒秒杀申请:"+seckillBoxSearchParams.toString());
+        IPage<BoxSeckillApply> boxSeckillPage = boxSeckillApplyService.getBoxSeckillApplyPage(seckillBoxSearchParams, pageVo);
         return ResultUtil.data(boxSeckillPage);
     }
 
