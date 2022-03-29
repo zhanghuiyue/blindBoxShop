@@ -59,4 +59,11 @@ public interface BoxSeckillApplyService extends IService<BoxSeckillApply> {
      */
     List<BoxSeckillBoxVO> getSeckillBox(Integer timeline);
 
+    /**
+     *
+     * @param id   活动id
+     * @return
+     */
+    Boolean deleteBySeckillId(String id);
+
 }

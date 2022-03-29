@@ -22,6 +22,7 @@ import cn.lili.modules.blindBox.service.BoxSeckillService;
 import cn.lili.modules.promotion.entity.enums.PromotionsApplyStatusEnum;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -211,4 +212,11 @@ public class BoxSeckillApplyServiceImpl extends ServiceImpl<BoxSeckillApplyMappe
         return boxSeckillBoxVOs;
     }
 
+    @Override
+   public  Boolean deleteBySeckillId(String id) {
+        QueryWrapper queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("seckill_id", id);
+        this.remove(queryWrapper);
+        return  true ;
+    }
 }

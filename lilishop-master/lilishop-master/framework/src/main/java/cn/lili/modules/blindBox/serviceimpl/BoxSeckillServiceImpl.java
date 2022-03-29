@@ -6,18 +6,17 @@ import cn.lili.common.exception.ServiceException;
 import cn.lili.modules.blindBox.entity.dos.BoxSeckill;
 import cn.lili.modules.blindBox.entity.dto.search.SeckillBoxSearchParams;
 import cn.lili.modules.blindBox.mapper.BoxSeckillMapper;
+import cn.lili.modules.blindBox.service.BoxSeckillApplyService;
 import cn.lili.modules.blindBox.service.BoxSeckillService;
 import cn.lili.modules.blindBox.tool.SeckillTools;
 import cn.lili.mybatis.util.PageUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.Date;
 import java.util.List;
 
@@ -32,6 +31,12 @@ import java.util.List;
 @Slf4j
 public class BoxSeckillServiceImpl extends ServiceImpl<BoxSeckillMapper, BoxSeckill> implements BoxSeckillService {
 
+
+    /**
+     * 秒杀
+     */
+    @Autowired
+    private BoxSeckillApplyService boxSeckillApplyService;
 
     @Override
     public IPage<BoxSeckill> queryByParams(SeckillBoxSearchParams seckillBoxSearchParams) {
@@ -107,7 +112,7 @@ public class BoxSeckillServiceImpl extends ServiceImpl<BoxSeckillMapper, BoxSeck
                 t.setEndTime(null);
             }
             this.checkStatus(t);
-          /*  this.updateSeckillBox(t);*/
+            this.updateSeckillBox(t);
 
         }
         if (startTime != null && endTime != null) {
@@ -117,5 +122,18 @@ public class BoxSeckillServiceImpl extends ServiceImpl<BoxSeckillMapper, BoxSeck
         }
     }
 
+    /**
+     * 更新促销盲盒信息
+     *
+     * @param boxSeckill 促销实体
+     * @return
+     */
+
+
+    public boolean updateSeckillBox(BoxSeckill boxSeckill) {
+
+        boxSeckillApplyService.deleteBySeckillId(boxSeckill.getId());
+        return true ;
+    }
 
 }

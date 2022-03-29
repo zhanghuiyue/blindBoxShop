@@ -33,6 +33,10 @@ public class SeckillBoxSearchParams  extends PageVO implements Serializable {
     @ApiModelProperty(value = "活动结束时间")
     private Long endTime;
 
+
+    @ApiModelProperty(value = "活动seckill_id")
+    private String seckill_id;
+
     /**
      * @see SeckillStatusEnum
      */
@@ -57,6 +61,10 @@ public class SeckillBoxSearchParams  extends PageVO implements Serializable {
     }
     public <T> QueryWrapper<T> baseQueryWrapper() {
         QueryWrapper<T> queryWrapper = new QueryWrapper<>();
+
+        if (CharSequenceUtil.isNotEmpty(seckill_id)) {
+            queryWrapper.eq("seckill_id", seckill_id);
+        }
 
         if (startTime != null) {
             queryWrapper.ge("start_time", new Date(startTime));
