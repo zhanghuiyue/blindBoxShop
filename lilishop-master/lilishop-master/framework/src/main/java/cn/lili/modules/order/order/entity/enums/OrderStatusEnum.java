@@ -14,6 +14,7 @@ public enum OrderStatusEnum {
     UNPAID("未付款"),
     PAID("已付款"),
     UNDELIVERED("待发货"),
+    UNDELWAY("进行中"),
     DELIVERED("已发货"),
     COMPLETED("已完成"),
     /**
