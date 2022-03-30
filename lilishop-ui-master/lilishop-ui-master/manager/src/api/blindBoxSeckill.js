@@ -19,8 +19,8 @@ export const getBoxSeckillList = params => {
 };
 
 // 获取秒杀活动审核列表
-export const seckillBoxList = params => {
-  return getRequest("/blind-box/recommendBanner/seckill/apply", params);
+export const seckillBoxList = (id, params) => {
+  return getRequest(`/blind-box/recommendBanner/seckill/applyList/${id}`, params);
 };
 
 // 获取秒杀活动详情数据
