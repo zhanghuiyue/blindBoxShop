@@ -64,6 +64,10 @@ public class Member extends BaseEntity {
     private Long point;
 
     @Min(message = "必须为数字", value = 0)
+    @ApiModelProperty(value = "元气豆数量")
+    private Long vitalityBean;
+
+    @Min(message = "必须为数字", value = 0)
     @ApiModelProperty(value = "积分总数量")
     private Long totalPoint;
 
