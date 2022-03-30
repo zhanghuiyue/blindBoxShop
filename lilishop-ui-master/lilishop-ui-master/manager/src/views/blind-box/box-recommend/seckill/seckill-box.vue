@@ -150,7 +150,7 @@ export default {
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 0, // 当前页数
-        pageSize: 1000, // 页面大小
+        pageSize: 15, // 页面大小
       },
       tabIndex: 0, // 选择商品的下标
       submitLoading: false, // 添加或编辑提交状态
@@ -276,8 +276,10 @@ export default {
           list: [],
         });
       });
-      seckillBoxList(this.searchForm).then((res) => {
-        console.log("盲盒列表："+JSON.stringify(res));
+
+      console.log("活动id:"+JSON.stringify(this.searchForm));
+      seckillBoxList(this.$route.query.id).then((res) => {
+       console.log("盲盒列表："+JSON.stringify(this.searchForm));
         this.loading = false;
         if (res.success && res.result) {
           let data = res.result.records;
