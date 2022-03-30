@@ -143,7 +143,8 @@ CREATE TABLE `li_substitution_order` (
 
 alter table `li_goods` add column sinewy_beans INT DEFAULT NULL COMMENT '元气豆数'
 alter table `li_goods_sku` add column sinewy_beans INT DEFAULT NULL COMMENT '元气豆数'
-alter table `li_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，盲盒商品';
+alter table `li_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
 alter table `li_coupon` add column blind_box_category VARCHAR(255) DEFAULT NULL COMMENT '盲盒的种类编号';
 alter table `li_coupon` add column name VARCHAR(255) DEFAULT NULL COMMENT '盲盒名称';
-alter table `li_coupon_activity` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，盲盒商品';
+alter table `li_coupon_activity` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
+alter table `li_member_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';

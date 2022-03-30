@@ -83,7 +83,7 @@ public class Coupon extends BasePromotions {
     private Integer effectiveDays;
 
     @ApiModelProperty(value = "商品类型，0表示普通商品，1表示盲盒商品")
-    private String goondsType;
+    private String goodsType;
 
     @ApiModelProperty(value = "盲盒类型id")
     private String blindBoxCategory;

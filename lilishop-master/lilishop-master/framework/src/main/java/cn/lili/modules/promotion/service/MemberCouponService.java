@@ -1,7 +1,10 @@
 package cn.lili.modules.promotion.service;
 
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponQuery;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -26,6 +29,14 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     void checkCouponLimit(String couponId, String memberId);
 
     /**
+     * 检查该会员领取优惠券的可领取数量
+     *
+     * @param coupon 优惠券信息
+     * @param memberId 会员
+     */
+    void checkCouponLimit(Coupon coupon, String memberId);
+
+    /**
      * 领取优惠券
      *
      * @param couponId   优惠券编号
@@ -44,6 +55,11 @@ public interface MemberCouponService extends IService<MemberCoupon> {
     void receiveCoupon(String couponId, String memberId, String memberName);
 
     /**
+     * 批量领取优惠券
+     * @param couponSearchParams
+     */
+    void receiveBuyerCouponList(List<CouponSearchParams> couponSearchParams);
+    /**
      * 获取会员优惠券列表
      *
      * @param param  查询参数
@@ -52,6 +68,12 @@ public interface MemberCouponService extends IService<MemberCoupon> {
      */
     IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo);
 
+    /**
+     * 获取会员优惠券列表
+     * @param memberCouponQuery
+     * @return IPage<MemberCoupon>
+     */
+    IPage<MemberCoupon> getMemberCoupons(MemberCouponQuery memberCouponQuery);
     /**
      * 获取会员优惠券列表
      *

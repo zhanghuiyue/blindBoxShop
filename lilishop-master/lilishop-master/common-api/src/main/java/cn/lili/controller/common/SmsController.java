@@ -41,7 +41,7 @@ public class SmsController {
             @RequestHeader String uuid,
             @PathVariable String mobile,
             @PathVariable VerificationEnums verificationEnums) {
-        verificationService.check(uuid, verificationEnums);
+        //verificationService.check(uuid, verificationEnums);
         smsUtil.sendSmsCode(mobile, verificationEnums, uuid);
         return ResultUtil.success(ResultCode.VERIFICATION_SEND_SUCCESS);
     }

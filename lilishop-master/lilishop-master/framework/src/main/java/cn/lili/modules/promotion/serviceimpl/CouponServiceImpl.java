@@ -87,6 +87,14 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
     }
 
     @Override
+    public void receiveCouponList(List<Coupon> coupons, Integer receiveNum) {
+        for (Coupon coupon:coupons) {
+            coupon.setReceivedNum(coupon.getReceivedNum() + receiveNum);
+        }
+        this.updateBatchById(coupons);
+    }
+
+    @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean removePromotions(List<String> ids) {
         //删除优惠券信息
@@ -128,6 +136,14 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         final IPage<CouponVO> couponVOIPage = PageUtil.convertPage(couponIPage, couponVOList);
         return couponVOIPage;
     }
+
+    @Override
+    public List<CouponVO> findAllForFree(CouponSearchParams searchParams) {
+        List<Coupon> coupons =this.baseMapper.selectList(searchParams.queryWrapper());
+        List<CouponVO> couponVOList = coupons.stream().map(CouponVO::new).collect(Collectors.toList());
+        return couponVOList;
+    }
+
 
     /**
      * 获取优惠券展示详情

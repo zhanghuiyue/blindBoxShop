@@ -5,9 +5,12 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponQuery;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
@@ -22,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +77,24 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         }
     }
 
+    @Override
+    public void checkCouponLimit(Coupon coupon, String memberId) {
+        LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<MemberCoupon>()
+                .eq(MemberCoupon::getCouponId, coupon.getId())
+                .eq(MemberCoupon::getMemberId, memberId);
+        long haveCoupons = this.count(queryWrapper);
+        if (!PromotionsStatusEnum.START.name().equals(coupon.getPromotionStatus())) {
+            throw new ServiceException(ResultCode.COUPON_RECEIVE_ERROR);
+        }
+        if (coupon.getPublishNum() != 0 && coupon.getReceivedNum()!=null && coupon.getReceivedNum() >= coupon.getPublishNum()) {
+            throw new ServiceException(ResultCode.COUPON_NUM_INSUFFICIENT_ERROR);
+        }
+        if (!coupon.getCouponLimitNum().equals(0) && haveCoupons >= coupon.getCouponLimitNum()) {
+            throw new ServiceException(ResultCode.COUPON_LIMIT_ERROR, "此优惠券最多领取" + coupon.getCouponLimitNum() + "张");
+        }
+    }
+
+
     /**
      * 领取优惠券
      *
@@ -105,10 +127,56 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         }
     }
 
+    /**
+     * 批量领取优惠券
+     * @param couponSearchParams
+     */
+    @Override
+    public void receiveBuyerCouponList(List<CouponSearchParams> couponSearchParams) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        List<String> ids = new ArrayList<>();
+        for (CouponSearchParams searchParams:couponSearchParams) {
+            ids.add(searchParams.getId());
+        }
+        List<Coupon> couponList = couponService.getBaseMapper().selectBatchIds(ids);
+        if(CollectionUtils.isNotEmpty(couponList)){
+            receiverCouponList(currentUser.getId(),currentUser.getUsername(),couponList);
+        }else {
+            throw new ServiceException(ResultCode.COUPON_NOT_EXIST);
+        }
+    }
+
     @Override
     public IPage<MemberCoupon> getMemberCoupons(MemberCouponSearchParams param, PageVO pageVo) {
         QueryWrapper<MemberCoupon> queryWrapper = param.queryWrapper();
         return this.page(PageUtil.initPage(pageVo), queryWrapper);
+    }
+
+    @Override
+    public IPage<MemberCoupon> getMemberCoupons(MemberCouponQuery memberCouponQuery) {
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        IPage<MemberCoupon> memberCouponIPage = null;
+        if("0".equals(memberCouponQuery.getQueryType())){
+            LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberCoupon::getMemberId, currentUser.getId());
+            queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.NEW.name());
+            queryWrapper.eq(MemberCoupon::getDeleteFlag, 0);
+            queryWrapper.ge(MemberCoupon::getEndTime,new Date());
+            memberCouponIPage =this.page(PageUtil.initPage(memberCouponQuery),queryWrapper);
+        }else if("1".equals(memberCouponQuery.getQueryType()) && "0".equals(memberCouponQuery.getUnUseType())){
+            LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberCoupon::getMemberId, currentUser.getId());
+            queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.USED.name());
+            queryWrapper.eq(MemberCoupon::getDeleteFlag, 0);
+            memberCouponIPage =this.page(PageUtil.initPage(memberCouponQuery),queryWrapper);
+        }else {
+            LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(MemberCoupon::getMemberId, currentUser.getId());
+            queryWrapper.eq(MemberCoupon::getMemberCouponStatus, MemberCouponStatusEnum.EXPIRE.name());
+            queryWrapper.eq(MemberCoupon::getDeleteFlag, 0);
+            memberCouponIPage = this.page(PageUtil.initPage(memberCouponQuery),queryWrapper);
+        }
+        return memberCouponIPage;
     }
 
     /**
@@ -284,6 +352,22 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         couponService.receiveCoupon(couponId, 1);
     }
 
+    @Transactional
+    public void receiverCouponList(String memberId, String memberName, List<Coupon> coupons){
+        List<MemberCoupon> memberCouponList =  new  ArrayList<MemberCoupon>();
+        for (Coupon coupon:coupons) {
+            this.checkCouponLimit(coupon, memberId);
+            MemberCoupon memberCoupon = new MemberCoupon(coupon);
+            memberCoupon.setMemberId(memberId);
+            memberCoupon.setMemberName(memberName);
+            memberCoupon.setMemberCouponStatus(MemberCouponStatusEnum.NEW.name());
+            memberCoupon.setPlatformFlag((PromotionTools.PLATFORM_ID).equals(coupon.getStoreId()));
+            memberCouponList.add(memberCoupon);
+        }
+        this.saveBatch(memberCouponList);
+        couponService.receiveCouponList(coupons,1);
+    }
+
     @Override
     public List<MemberCoupon> getBlidBoxCanUseCoupon(String memberId, Double totalPrice) {
         QueryWrapper<MemberCoupon> queryWrapper = Wrappers.query();
@@ -292,7 +376,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq("delete_flag", 0);
         queryWrapper.ge("end_time",new Date());
         queryWrapper.le("consume_threshold",totalPrice);
-        queryWrapper.eq("get_type",CouponGetEnum.BLINDBOX.name());
+        queryWrapper.eq("goods_type","1");
         return this.baseMapper.selectList(queryWrapper);
     }
 
@@ -304,7 +388,7 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         queryWrapper.eq("delete_flag", 0);
         queryWrapper.ge("end_time",new Date());
         queryWrapper.gt("consume_threshold",totalPrice);
-        queryWrapper.eq("get_type",CouponGetEnum.BLINDBOX.name());
+        queryWrapper.eq("goods_type","0");
         return this.baseMapper.selectList(queryWrapper);
     }
 

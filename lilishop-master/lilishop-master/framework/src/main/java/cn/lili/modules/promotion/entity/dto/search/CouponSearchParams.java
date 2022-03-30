@@ -26,6 +26,12 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
     private static final String PRICE_COLUMN = "price";
     private static final String RANGE_DAY_TYPE_COLUMN = "range_day_type";
 
+    @ApiModelProperty(value = "id")
+    private String id;
+
+    @ApiModelProperty(value = "商品类型，0表示普通商品，1表示盲盒商品,ALL查询全部")
+    private String goodsType;
+
     @ApiModelProperty(value = "会员id")
     private String memberId;
 
@@ -61,6 +67,9 @@ public class CouponSearchParams extends BasePromotionsSearchParams implements Se
     @Override
     public <T> QueryWrapper<T> queryWrapper() {
         QueryWrapper<T> queryWrapper = super.baseQueryWrapper();
+        if(CharSequenceUtil.isNotEmpty(goodsType)&& !"ALL".equals(goodsType)){
+            queryWrapper.eq("goods_type", goodsType);
+        }
         if (CharSequenceUtil.isNotEmpty(couponName)) {
             queryWrapper.like("coupon_name", couponName);
         }

@@ -8,6 +8,7 @@ import cn.lili.common.vo.PageVO;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.MemberCouponQuery;
 import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.CouponGetEnum;
 import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
@@ -20,12 +21,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -60,7 +59,31 @@ public class CouponBuyerController {
         return ResultUtil.data(canUseCoupons);
     }
 
+    @GetMapping("/list")
+    @ApiOperation(value = "获取可领取优惠券列表")
+    public ResultMessage<List<CouponVO>> getCouponListForFree() {
+        CouponSearchParams queryParam = new CouponSearchParams();
+        queryParam.setPromotionStatus(PromotionsStatusEnum.START.name());
+        queryParam.setGetType(CouponGetEnum.FREE.name());
+        List<CouponVO> canUseCoupons = couponService.findAllForFree(queryParam);
+        return ResultUtil.data(canUseCoupons);
+    }
 
+    @ApiOperation(value = "会员领取优惠券")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "couponId", value = "优惠券ID", required = true, dataType = "list", paramType = "path")
+    })
+    @PostMapping(value = "/receive", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Object> receiveCoupon( @RequestBody List<CouponSearchParams> couponSearchParams) {
+        memberCouponService.receiveBuyerCouponList(couponSearchParams);
+        return ResultUtil.success();
+    }
+
+    @ApiOperation(value = "获取当前会员的优惠券列表")
+    @PostMapping(value = "/getCouponList", consumes = "application/json", produces = "application/json")
+    public ResultMessage<IPage<MemberCoupon>> getCouponsList(@RequestBody MemberCouponQuery memberCouponQuery) {
+        return ResultUtil.data(memberCouponService.getMemberCoupons(memberCouponQuery));
+    }
 
     @ApiOperation(value = "获取当前会员的优惠券列表")
     @GetMapping("/getCoupons")
