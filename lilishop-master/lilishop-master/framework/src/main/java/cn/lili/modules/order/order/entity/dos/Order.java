@@ -199,6 +199,10 @@ public class Order extends BaseEntity {
     @ApiModelProperty(value = "使用的平台会员优惠券id")
     private String usePlatformMemberCouponId;
 
+    @ApiModelProperty(value = "元气豆")
+    private Integer sinewyBean;
+
+
     /**
      * 构建订单
      *
