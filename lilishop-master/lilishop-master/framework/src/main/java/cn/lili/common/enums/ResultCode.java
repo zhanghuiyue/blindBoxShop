@@ -487,12 +487,25 @@ public enum ResultCode {
     SECKILL_BOX_NOT_EXIST_ERROR(90017, "当前参与的秒杀活动不存在！"),
     SECKILL_BOX_PRICE_ERROR(90018, "盲盒活动价格不能大于商品原价"),
     SECKILL_BOX_TIME_ERROR(90018, "时刻参数异常"),
+
+
+    /**
+     * 兑换商城
+     */
+    EXCHANGE_ERROR(91001, "读取结算页的兑换异常"),
+    EXCHANGE_NUM_ERROR(91002, "兑换数量必须大于0"),
+    EXCHANGE_NOT_APPLY(91003, "兑换商品不支持当前收货地址配送"),
+
+
     /**
      * 订单
      */
     ORDER_NOT_EXIT_ERROR(100000,"订单不存在"),
     ORDER_NOT_PAY_ERROR(100001,"订单未支付"),
     ORDER_EXTRACT_ERROR(100002,"订单未支付");
+
+
+
 
 
     private final Integer code;
