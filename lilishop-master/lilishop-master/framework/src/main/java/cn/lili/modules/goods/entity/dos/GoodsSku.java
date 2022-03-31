@@ -158,6 +158,10 @@ public class GoodsSku extends BaseEntity {
     @ApiModelProperty(value = "商品类型", required = true)
     private String goodsType;
 
+    @ApiModelProperty(value = "元气豆数")
+    private Integer sinewyBean;
+
+
     public Double getWeight() {
         if (weight == null) {
             return 0d;
