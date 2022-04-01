@@ -269,8 +269,8 @@ public class EsGoodsIndex implements Serializable {
      *元气豆
      */
     @Field(type = FieldType.Double)
-    @ApiModelProperty("商品价格")
-    private Double sinewyBean;
+    @ApiModelProperty("元气豆")
+    private Integer sinewyBean;
 
     /**
      * 商品属性（参数和规格）
@@ -315,6 +315,7 @@ public class EsGoodsIndex implements Serializable {
             this.authFlag = sku.getAuthFlag();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
+            this.sinewyBean = sku.getSinewyBean();
             this.recommend = sku.getRecommend();
             this.goodsType = sku.getGoodsType();
             this.releaseTime = new Date();
@@ -380,6 +381,7 @@ public class EsGoodsIndex implements Serializable {
             this.salesModel = sku.getSalesModel();
             this.marketEnable = sku.getMarketEnable();
             this.authFlag = sku.getAuthFlag();
+            this.sinewyBean = sku.getSinewyBean();
             this.intro = sku.getIntro();
             this.grade = sku.getGrade();
             this.releaseTime = new Date();
