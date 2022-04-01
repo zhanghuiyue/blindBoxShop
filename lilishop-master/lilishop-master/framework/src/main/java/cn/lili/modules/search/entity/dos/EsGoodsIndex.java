@@ -264,6 +264,14 @@ public class EsGoodsIndex implements Serializable {
     @ApiModelProperty(value = "商品sku基础分数", required = true)
     private Integer skuSource;
 
+
+    /**
+     *元气豆
+     */
+    @Field(type = FieldType.Double)
+    @ApiModelProperty("商品价格")
+    private Double sinewyBean;
+
     /**
      * 商品属性（参数和规格）
      */
