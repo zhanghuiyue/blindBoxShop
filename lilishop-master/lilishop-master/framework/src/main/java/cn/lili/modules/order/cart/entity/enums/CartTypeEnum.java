@@ -17,6 +17,10 @@ public enum CartTypeEnum {
      */
     BUY_NOW,
     /**
+     * 元气豆购买
+     */
+    BEAN,
+    /**
      * 虚拟商品
      */
     VIRTUAL,
