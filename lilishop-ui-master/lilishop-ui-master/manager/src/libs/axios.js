@@ -346,7 +346,7 @@ export const postRequestWithNoToken = (url, params) => {
 
 /**
  * 无需token验证的请求 避免旧token过期导致请求失败
- * @param {*} url 
+ * @param {*} url
  * @param {*} params
  */
 export const postRequestWithNoTokenData = (url, params) => {
@@ -359,3 +359,5 @@ export const postRequestWithNoTokenData = (url, params) => {
     data: params
   });
 };
+// 文件上传接口
+export const uploadFile = commonUrl + "/common/common/upload/file";
