@@ -127,6 +127,12 @@ public class TradeDTO implements Serializable {
      */
     private String distributionId;
 
+
+    /**
+     * 元气豆
+     */
+    private Integer sinewyBean;
+
     /**
      * 订单vo
      */
