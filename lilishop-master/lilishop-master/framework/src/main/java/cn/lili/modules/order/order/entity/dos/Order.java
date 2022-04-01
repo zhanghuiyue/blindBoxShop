@@ -231,6 +231,7 @@ public class Order extends BaseEntity {
         this.setConsigneeDetail(tradeDTO.getMemberAddress().getDetail());
         this.setConsigneeMobile(tradeDTO.getMemberAddress().getMobile());
         this.setConsigneeName(tradeDTO.getMemberAddress().getName());
+        this.setSinewyBean(tradeDTO.getSinewyBean());
         //平台优惠券判定
         if (tradeDTO.getPlatformCoupon() != null) {
             this.setUsePlatformMemberCouponId(tradeDTO.getPlatformCoupon().getMemberCoupon().getId());
