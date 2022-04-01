@@ -507,7 +507,9 @@ public enum ResultCode {
     /**
      * 赠送商品
      */
-    GOODS_EXCHANGE_ERROR(120000,"赠送商品已领取或者已超时");
+    GOODS_EXCHANGE_ERROR(120000,"赠送商品已领取或者已超时"),
+    GOODS_EXCHANGE_MEMBER_ERROR(120001,"自己不能领取商品"),
+    GOODS_NOT_EXIT_ERROR(120002,"赠送商品不存在");
 
 
 

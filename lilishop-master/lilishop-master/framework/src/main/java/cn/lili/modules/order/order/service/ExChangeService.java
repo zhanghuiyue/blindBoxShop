@@ -6,7 +6,6 @@ import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.dto.ExChangeTradeDTO;
-import cn.lili.modules.order.order.entity.vo.ExChangeParams;
 
 /**
  * 兑换商品业务层

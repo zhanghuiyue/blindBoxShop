@@ -17,10 +17,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
 import java.util.HashMap;
@@ -43,7 +40,7 @@ public class GoodsGiveController {
     @GetMapping(value = "/cancel/time")
     public ResultMessage<Object> queryCancelTime() {
         Map map = new HashMap();
-        Setting setting = settingService.get(SettingEnum.GIVE_SETTING.name());
+        Setting setting = settingService.getBaseMapper().selectById(SettingEnum.GIVE_SETTING.name());
         GoodsGiveSetting goodsGiveSetting = JSONUtil.toBean(setting.getSettingValue(), GoodsGiveSetting.class);
         if (goodsGiveSetting != null && goodsGiveSetting.getAutoCancel() != null) {
             map.put("autoCancel",goodsGiveSetting.getAutoCancel());
@@ -54,24 +51,33 @@ public class GoodsGiveController {
     }
 
     @ApiOperation(value = "赠送")
-    @GetMapping(value = "/give")
-    public ResultMessage<Object> give(GiveGoodsDTO giveGoodsDTO) {
+    @PostMapping(value = "/goods", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Object> give(@RequestBody GiveGoodsDTO giveGoodsDTO) {
         String id = goodsGiveService.give(giveGoodsDTO);
         Map map = new HashMap();
         map.put("id",id);
         return ResultUtil.data(map);
     }
 
+    @ApiOperation(value = "取消赠送")
+    @PostMapping(value = "/cancel", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Object> cancel(@RequestBody GiveGoodsDTO giveGoodsDTO) {
+        goodsGiveService.cancel(giveGoodsDTO);
+        return ResultUtil.success();
+    }
+
     @ApiOperation(value = "赠送商品查询")
-    @GetMapping(value = "/give/goods/query")
+    @GetMapping(value = "/query")
     public ResultMessage<GiveGoodsVO> giveGoodsQuery(@RequestParam String  id) {
         return ResultUtil.data(goodsGiveService.giveGoodsQuery(id));
     }
 
     @ApiOperation(value = "赠送商品兑换")
-    @GetMapping(value = "/give/goods/exchange")
+    @GetMapping(value = "/exchange")
     public ResultMessage<Object> giveGoodsExchange(@RequestParam String  giveCode) {
         goodsGiveService.giveGoodsExchange(giveCode);
         return ResultUtil.success();
     }
+
+
 }

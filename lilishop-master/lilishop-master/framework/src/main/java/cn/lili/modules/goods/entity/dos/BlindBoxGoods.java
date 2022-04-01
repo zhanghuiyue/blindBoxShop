@@ -1,5 +1,6 @@
 package cn.lili.modules.goods.entity.dos;
 
+import cn.lili.mybatis.BaseEntity;
 import cn.lili.mybatis.BaseIdEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -9,7 +10,7 @@ import lombok.Data;
 @Data
 @TableName("li_blind_box_goods")
 @ApiModel(value = "盲盒商品")
-public class BlindBoxGoods extends BaseIdEntity {
+public class BlindBoxGoods extends BaseEntity {
 
     private static final long serialVersionUID = -8236865838438521426L;
     @ApiModelProperty(value = "id")

@@ -25,7 +25,6 @@ import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.dto.ExChangeTradeDTO;
 import cn.lili.modules.order.order.entity.enums.ExChangeTypeEnum;
-import cn.lili.modules.order.order.entity.vo.ExChangeParams;
 import cn.lili.modules.order.order.service.ExChangeService;
 import cn.lili.modules.order.order.service.OrderItemService;
 import cn.lili.modules.order.order.service.OrderService;
