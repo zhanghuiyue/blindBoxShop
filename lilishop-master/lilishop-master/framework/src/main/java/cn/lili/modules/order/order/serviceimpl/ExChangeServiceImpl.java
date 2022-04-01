@@ -1,11 +1,13 @@
 package cn.lili.modules.order.order.serviceimpl;
 
 
+import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.cache.Cache;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
+import cn.lili.common.utils.CurrencyUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.entity.enums.GoodsAuthEnum;
@@ -13,9 +15,11 @@ import cn.lili.modules.goods.entity.enums.GoodsStatusEnum;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.member.entity.dos.MemberAddress;
 import cn.lili.modules.member.service.MemberAddressService;
+import cn.lili.modules.order.cart.entity.dto.TradeDTO;
+import cn.lili.modules.order.cart.entity.enums.CartTypeEnum;
 import cn.lili.modules.order.cart.entity.vo.CartSkuVO;
+import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.cart.render.TradeBuilder;
-import cn.lili.modules.order.order.entity.dos.ExChangeTrade;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.OrderItem;
 import cn.lili.modules.order.order.entity.dos.Trade;
@@ -31,7 +35,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * 兑换商品业务层实现
@@ -69,6 +72,11 @@ public class ExChangeServiceImpl implements ExChangeService {
     @Autowired
     private OrderService orderService;
 
+    /**
+     * 交易
+     */
+    @Autowired
+    private TradeBuilder tradeBuilder;
 
     /**
      * 子订单
@@ -76,34 +84,95 @@ public class ExChangeServiceImpl implements ExChangeService {
     @Autowired
     private OrderItemService orderItemService;
 
-
-    /**
-     *
-     * @param skuId    要写入的skuId
-     * @param num      要加入兑换池的数量
-     */
     @Override
-    public void add(String skuId, Integer num) {
+    public void add(String skuId, Integer num, String cartType, Boolean cover) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         if (num <= 0) {
-            throw new ServiceException(ResultCode.EXCHANGE_ERROR);
+            throw new ServiceException(ResultCode.CART_NUM_ERROR);
         }
-        ExChangeTypeEnum exChanageTypeEnum = getCartType();
+        CartTypeEnum cartTypeEnum = getCartType(cartType);
         GoodsSku dataSku = checkGoods(skuId);
-        ExChangeTradeDTO exChangeTradeDTO = new ExChangeTradeDTO();
-        exChangeTradeDTO.setMemberId(currentUser.getId());
-        exChangeTradeDTO.setMemberName(currentUser.getUsername());
-        exChangeTradeDTO.setSkuId(skuId);
-        //检测是否可购买
-        checkSetGoodsQuantity(skuId, 1);
-        //检测缓存是否存在，不存在就写入缓存
-        this.resetExChangeTradeDTO( exChangeTradeDTO);
+        System.out.println("商品信息："+dataSku.toString());
 
+
+        try {
+            //兑换池支付方式购买需要保存之前的选择，其他方式购买，则直接抹除掉之前的记录
+            TradeDTO tradeDTO;
+
+            tradeDTO = new TradeDTO(cartTypeEnum);
+            tradeDTO.setMemberId(currentUser.getId());
+            tradeDTO.setMemberName(currentUser.getUsername());
+            List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
+            System.out.println("元气豆数量："+dataSku.getSinewyBean());
+            tradeDTO.setSinewyBean(dataSku.getSinewyBean());
+            //兑换池中不存在此商品，则新建立一个
+            CartSkuVO cartSkuVO = new CartSkuVO(dataSku, null);
+            cartSkuVO.setCartType(cartTypeEnum);
+            //检测兑换池数据
+            checkCart(cartTypeEnum, cartSkuVO, skuId, num);
+            //计算兑换池小计
+            cartSkuVO.setSubTotal(CurrencyUtil.mul(cartSkuVO.getPurchasePrice(), cartSkuVO.getNum()));
+            cartSkuVOS.add(cartSkuVO);
+
+
+            tradeDTO.setCartTypeEnum(cartTypeEnum);
+            //如兑换池发生更改，则重置优惠券
+            tradeDTO.setStoreCoupons(null);
+            tradeDTO.setPlatformCoupon(null);
+            this.resetTradeDTO(tradeDTO);
+        } catch (ServiceException serviceException) {
+            throw serviceException;
+        } catch (Exception e) {
+            log.error("兑换池渲染异常", e);
+            throw new ServiceException(errorMessage);
+        }
+    }
+
+
+
+    public void resetTradeDTO(TradeDTO tradeDTO) {
+        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
     }
 
 
     /**
-     * 校验商品有效性，判定失效和库存
+     * 读取当前会员购物原始数据key
+     *
+     * @param cartTypeEnum 获取方式
+     * @return 当前会员购物原始数据key
+     */
+    private String getOriginKey(CartTypeEnum cartTypeEnum) {
+
+        //缓存key，默认使用兑换池
+        if (cartTypeEnum != null) {
+            AuthUser currentUser = UserContext.getCurrentUser();
+            return cartTypeEnum.getPrefix() + currentUser.getId();
+        }
+        throw new ServiceException(ResultCode.ERROR);
+    }
+
+    /**
+     * 获取购买类型
+     *
+     * @param way
+     * @return
+     */
+    private CartTypeEnum getCartType(String way) {
+        //默认兑换池
+        CartTypeEnum cartTypeEnum = CartTypeEnum.CART;
+        if (CharSequenceUtil.isNotEmpty(way)) {
+            try {
+                cartTypeEnum = CartTypeEnum.valueOf(way);
+            } catch (IllegalArgumentException e) {
+                log.error("获取支付类型出现错误：", e);
+            }
+        }
+        return cartTypeEnum;
+    }
+
+
+    /**
+     * 校验商品有效性，判定失效和库存，促销活动价格
      *
      * @param skuId 商品skuId
      */
@@ -118,47 +187,29 @@ public class ExChangeServiceImpl implements ExChangeService {
         return dataSku;
     }
 
-
     /**
-     * 读取当前会员购物原始数据key
+     * 检测兑换池
      *
-     * @param exChangeTypeEnum 获取方式
-     * @return 当前会员购物原始数据key
+     * @param cartTypeEnum 兑换池枚举
+     * @param cartSkuVO    SKUVO
+     * @param skuId        SkuId
+     * @param num          数量
      */
-    private String getOriginKey(ExChangeTypeEnum exChangeTypeEnum) {
+    private void checkCart(CartTypeEnum cartTypeEnum, CartSkuVO cartSkuVO, String skuId, Integer num) {
 
-        //缓存key，默认使用购物车
-        if (exChangeTypeEnum != null) {
-            AuthUser currentUser = UserContext.getCurrentUser();
-            return exChangeTypeEnum.getPrefix() + currentUser.getId();
-        }
-        throw new ServiceException(ResultCode.ERROR);
+        this.checkSetGoodsQuantity(cartSkuVO, skuId, num);
+
+
     }
-
-    /**
-     * 获取购物车类型
-     *
-     * @return
-     */
-    private ExChangeTypeEnum getCartType() {
-        //默认购物车
-        ExChangeTypeEnum cartTypeEnum = ExChangeTypeEnum.BUY_NOW;
-        return cartTypeEnum;
-    }
-
-
-    public void resetExChangeTradeDTO(ExChangeTradeDTO exChangeTradeDTO) {
-        cache.put(this.getOriginKey(ExChangeTypeEnum.BUY_NOW), exChangeTradeDTO);
-    }
-
 
     /**
      * 检查并设置兑换池商品数量
      *
+     * @param cartSkuVO 兑换池商品对象
      * @param skuId     商品id
      * @param num       购买数量
      */
-    private void checkSetGoodsQuantity( String skuId, Integer num) {
+    private void checkSetGoodsQuantity(CartSkuVO cartSkuVO, String skuId, Integer num) {
         Integer enableStock = goodsSkuService.getStock(skuId);
 
         //如果sku的可用库存小于等于0或者小于用户购买的数量，则不允许购买
@@ -166,108 +217,67 @@ public class ExChangeServiceImpl implements ExChangeService {
             throw new ServiceException(ResultCode.GOODS_SKU_QUANTITY_NOT_ENOUGH);
         }
 
-    }
+        if (enableStock <= num) {
+            cartSkuVO.setNum(enableStock);
+        } else {
+            cartSkuVO.setNum(num);
+        }
 
+        if (cartSkuVO.getNum() > 99) {
+            cartSkuVO.setNum(99);
+        }
+    }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Order createExChangeTrade(ExChangeParams exChangeParams) {
-
-
-        //判断商品库存
-        GoodsSku  goodsSku = this.goodsSkuService.getById(exChangeParams.getSkuId());
-        AuthUser currentUser = UserContext.getCurrentUser();
-        MemberAddress memberAddress = this.memberAddressService.getMemberAddress(exChangeParams.getAddressID());
-       if(memberAddress==null){
-
-           memberAddress =this.memberAddressService.getDefaultMemberAddress();
-       }
+    public Trade createTrade(TradeParams tradeParams) {
+        //获取兑换池
+        CartTypeEnum cartTypeEnum = getCartType(tradeParams.getWay());
+        TradeDTO tradeDTO = this.readDTO(cartTypeEnum);
+        //设置基础属性
+        tradeDTO.setClientType(tradeParams.getClient());
+        tradeDTO.setStoreRemark(tradeParams.getRemark());
+        tradeDTO.setParentOrderSn(tradeParams.getParentOrderSn());
         //订单无收货地址校验
-        if ( memberAddress== null) {
+        if (tradeDTO.getMemberAddress() == null) {
             throw new ServiceException(ResultCode.MEMBER_ADDRESS_NOT_EXIST);
         }
-        //判断库存
-        checkSetGoodsQuantity(goodsSku.getId() ,1);
-
-        String sn = "o" + SnowFlake.getId();
-        Order order = new Order() ;
-        order.setSn(sn) ;
-        order.setStoreId(goodsSku.getStoreId());
-        order.setMemberId(currentUser.getId());
-        order.setMemberName(currentUser.getUsername());
-        order.setOrderStatus("UNPAID");
-        order.setPayStatus("UNPAID");
-        order.setConsigneeName(memberAddress.getName());
-        order.setConsigneeMobile(memberAddress.getMobile());
-        order.setConsigneeAddressPath(memberAddress.getConsigneeAddressPath());
-        order.setConsigneeAddressIdPath(memberAddress.getConsigneeAddressIdPath());
-        order.setConsigneeDetail(memberAddress.getDetail());
-        order.setStoreName(goodsSku.getStoreName());
-        order.setDeliveryMethod("LOGISTICS");
-
-        order.setFreightPrice(0.00);
-        order.setDiscountPrice(0.00);
-        order.setGoodsNum(1);
-        order.setCanReturn(false);
-        order.setOrderType("NORMAL");
-
-        OrderItem  orderItem =  new OrderItem();
-        orderItem.setOrderSn(sn);
-        orderItem.setSn("oi" + SnowFlake.getId());
-        orderItem.setGoodsId(goodsSku.getGoodsId());
-        orderItem.setSkuId(goodsSku.getId());
-        orderItem.setNum(1);
-        orderItem.setImage(goodsSku.getThumbnail());
-        orderItem.setGoodsName(goodsSku.getGoodsName());
-
-        //判断支付方式
-         if(exChangeParams.getPayWay().equals("MONEY")){
-
-             order.setPaymentMethod("MONEY");
-             order.setFlowPrice(goodsSku.getPrice());
-             order.setGoodsPrice(goodsSku.getPrice());
-             order.setSinewyBean(0);
-
-             orderItem.setUnitPrice(goodsSku.getPrice());
-             orderItem.setSinewyBean(0);
-             orderItem.setSubTotal(goodsSku.getPrice());
-             orderItem.setGoodsPrice(goodsSku.getPrice());
-             orderItem.setFlowPrice(goodsSku.getPrice());
-
-         }else if (exChangeParams.getPayWay().equals("BEAN")){
-
-             order.setPaymentMethod("BEAN");
-             order.setFlowPrice(0.00);
-             order.setGoodsPrice(0.00);
-             order.setSinewyBean(goodsSku.getSinewyBean());
-
-             orderItem.setUnitPrice(0.00);
-             orderItem.setSinewyBean(goodsSku.getSinewyBean());
-             orderItem.setGoodsPrice(0.00);
-             orderItem.setFlowPrice(0.00);
-
-        }
-        this.orderService.save(order);
-        this.orderItemService.save(orderItem);
-
-        return order ;
+        //构建交易
+        Trade trade = tradeBuilder.createTrade(tradeDTO);
+        this.cleanChecked(tradeDTO);
+        return trade;
     }
 
 
-    public ExChangeTradeDTO readExChanageDTO() {
-        ExChangeTradeDTO exChangeTradeDTO = (ExChangeTradeDTO) cache.get(this.getOriginKey(ExChangeTypeEnum.BUY_NOW));
-        if (exChangeTradeDTO == null) {
-            exChangeTradeDTO = new ExChangeTradeDTO();
+
+    public TradeDTO readDTO(CartTypeEnum checkedWay) {
+        TradeDTO tradeDTO = (TradeDTO) cache.get(this.getOriginKey(checkedWay));
+        if (tradeDTO == null) {
+            tradeDTO = new TradeDTO(checkedWay);
             AuthUser currentUser = UserContext.getCurrentUser();
-            exChangeTradeDTO.setMemberId(currentUser.getId());
-            exChangeTradeDTO.setMemberName(currentUser.getUsername());
+            tradeDTO.setMemberId(currentUser.getId());
+            tradeDTO.setMemberName(currentUser.getUsername());
         }
-        if (exChangeTradeDTO.getMemberAddress() == null) {
-            exChangeTradeDTO.setMemberAddress(this.memberAddressService.getDefaultMemberAddress());
+        if (tradeDTO.getMemberAddress() == null) {
+            tradeDTO.setMemberAddress(this.memberAddressService.getDefaultMemberAddress());
         }
-        return exChangeTradeDTO;
+        return tradeDTO;
     }
 
-
+    public void cleanChecked(TradeDTO tradeDTO) {
+        List<CartSkuVO> cartSkuVOS = tradeDTO.getSkuList();
+        List<CartSkuVO> deleteVos = new ArrayList<>();
+        for (CartSkuVO cartSkuVO : cartSkuVOS) {
+            if (Boolean.TRUE.equals(cartSkuVO.getChecked())) {
+                deleteVos.add(cartSkuVO);
+            }
+        }
+        cartSkuVOS.removeAll(deleteVos);
+        //清除选择的优惠券
+        tradeDTO.setPlatformCoupon(null);
+        tradeDTO.setStoreCoupons(null);
+        //清除添加过的备注
+        tradeDTO.setStoreRemark(null);
+        cache.put(this.getOriginKey(tradeDTO.getCartTypeEnum()), tradeDTO);
+    }
 
 }
