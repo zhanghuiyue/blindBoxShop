@@ -5,6 +5,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.vo.ResultMessage;
+import cn.lili.modules.order.cart.entity.vo.TradeParams;
 import cn.lili.modules.order.order.entity.vo.ExChangeParams;
 import cn.lili.modules.order.order.service.ExChangeService;
 import io.swagger.annotations.Api;
@@ -18,7 +19,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
- * 买家端，购物车接口
+ * 买家端，兑换商品接口
  *
  * @author Chopper
  * @since 2020/11/16 10:04 下午
@@ -40,32 +41,32 @@ public class ExChanageController {
     @PostMapping
     @ApiImplicitParams({
             @ApiImplicitParam(name = "skuId", value = "产品ID", required = true, dataType = "Long", paramType = "query"),
-            @ApiImplicitParam(name = "num", value = "此产品的购买数量", required = true, dataType = "int", paramType = "query")
+            @ApiImplicitParam(name = "num", value = "此产品的购买数量", required = true, dataType = "int", paramType = "query"),
+            @ApiImplicitParam(name = "cartType", value = "兑换类型，默认加入兑换池", paramType = "query")
     })
     public ResultMessage<Object> add(@NotNull(message = "产品id不能为空") String skuId,
-                                     @NotNull(message = "购买数量不能为空") @Min(value = 1, message = "加入购物池数量必须大于0") Integer num) {
+                                     @NotNull(message = "购买数量不能为空") @Min(value = 1, message = "加入兑换池数量必须大于0") Integer num,
+                                     String cartType) {
         try {
             //读取选中的列表
-            exChangeService.add(skuId, num);
+            exChangeService.add(skuId, num, cartType, true);
             return ResultUtil.success();
         } catch (ServiceException se) {
             log.info(se.getMsg(), se);
             throw se;
         } catch (Exception e) {
-            log.error(ResultCode.EXCHANGE_ERROR.message(), e);
-            throw new ServiceException(ResultCode.EXCHANGE_ERROR);
+            log.error(ResultCode.CART_ERROR.message(), e);
+            throw new ServiceException(ResultCode.CART_ERROR);
         }
     }
 
     @PreventDuplicateSubmissions
     @ApiOperation(value = "创建交易")
-    @PostMapping(value = "/create/tradeExchangeOrder", consumes = "application/json", produces = "application/json")
-    public ResultMessage<Object> crateExChangeTrade(@RequestBody ExChangeParams exChangeParams) {
+    @PostMapping(value = "/create/trade", consumes = "application/json", produces = "application/json")
+    public ResultMessage<Object> crateTrade(@RequestBody TradeParams tradeParams) {
         try {
-            //创建交易
-
-            return ResultUtil.data(this.exChangeService.createExChangeTrade(exChangeParams));
-
+            //读取选中的列表
+            return ResultUtil.data(this.exChangeService.createTrade(tradeParams));
         } catch (ServiceException se) {
             log.info(se.getMsg(), se);
             throw se;
@@ -74,7 +75,5 @@ public class ExChanageController {
             throw e;
         }
     }
-
-
 
 }
