@@ -502,8 +502,12 @@ public enum ResultCode {
      */
     ORDER_NOT_EXIT_ERROR(100000,"订单不存在"),
     ORDER_NOT_PAY_ERROR(100001,"订单未支付"),
-    ORDER_EXTRACT_ERROR(100002,"订单未支付");
+    ORDER_EXTRACT_ERROR(100002,"订单未支付"),
 
+    /**
+     * 赠送商品
+     */
+    GOODS_EXCHANGE_ERROR(120000,"赠送商品已领取或者已超时");
 
 
 

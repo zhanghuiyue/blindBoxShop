@@ -148,3 +148,44 @@ alter table `li_coupon` add column blind_box_category VARCHAR(255) DEFAULT NULL 
 alter table `li_coupon` add column name VARCHAR(255) DEFAULT NULL COMMENT '盲盒名称';
 alter table `li_coupon_activity` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
 alter table `li_member_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
+
+drop table li_give_goods
+CREATE TABLE `li_give_goods` (
+  `id` BIGINT NOT NULL COMMENT 'ID',
+  `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
+  `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
+  `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
+  `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
+  `give_code` VARCHAR(255) DEFAULT NULL COMMENT '赠送码',
+  `give_goods_id` VARCHAR(255) DEFAULT NULL COMMENT '赠送商品编号',
+  `give_sku_id` VARCHAR(255) DEFAULT NULL COMMENT '赠送商品sku编号',
+  `give_goods_type` VARCHAR(255) DEFAULT NULL COMMENT '赠送商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示赠送商品',
+  `give_member_id` VARCHAR(255) DEFAULT NULL COMMENT '赠送人',
+  `gived_member_id` VARCHAR(255) DEFAULT NULL COMMENT '被赠送人',
+  `exchange_status` VARCHAR(15) DEFAULT NULL COMMENT '兑换状态，UNEXCHANGE：未兑换，EXCHANGE:兑换',
+	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:取消赠送',
+	`cancel_reason` VARCHAR(255) DEFAULT NULL COMMENT '取消赠送理由',
+	`start_time` DATETIME(6) DEFAULT NULL COMMENT '赠送开始时间'
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+CREATE TABLE `li_warehouse` (
+  `id` BIGINT NOT NULL COMMENT 'ID',
+  `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
+  `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
+  `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
+  `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
+  `goods_id` VARCHAR(255) DEFAULT NULL COMMENT '商品编号',
+  `sku_id` VARCHAR(255) DEFAULT NULL COMMENT '商品sku编号',
+  `goods_type` char(1) DEFAULT NULL COMMENT '商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示赠送商品',
+  `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员编号',
+  `exchange_status` VARCHAR(15) DEFAULT NULL COMMENT '兑换状态，UNEXCHANGE：未兑换，EXCHANGE:兑换',
+	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:取消赠送',
+	`pick_up_goods_status` VARCHAR(15) DEFAULT NULL COMMENT '提货状态，PICKUPGOODS：提货，UNPICKUPGOODS:未提货',
+	`substitution_status` VARCHAR(15) DEFAULT NULL COMMENT '置换状态，SUBSTITUTION：置换，UNSUBSTITUTION:未置换',
+	`receive_status` VARCHAR(15) DEFAULT NULL COMMENT '领取状态，RECEIVE：领取，UNRECEIVE:未领取',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+

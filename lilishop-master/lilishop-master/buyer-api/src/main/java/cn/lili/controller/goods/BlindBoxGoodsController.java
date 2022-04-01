@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 @Api(tags = "买家端,盲盒商品接口")
-@RequestMapping("/buyer/goods")
+@RequestMapping("/buyer/blindbox/goods")
 public class BlindBoxGoodsController {
 
     /**

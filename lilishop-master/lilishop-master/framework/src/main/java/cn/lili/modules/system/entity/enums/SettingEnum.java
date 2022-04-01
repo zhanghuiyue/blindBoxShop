@@ -23,6 +23,8 @@ public enum SettingEnum {
     ORDER_SETTING,
     //盲盒订单配置
     BLINDBOX_ORDER_SETTING,
+    //赠送商品
+    GIVE_SETTING,
     //阿里OSS配置
     OSS_SETTING,
     //阿里短信配置 
