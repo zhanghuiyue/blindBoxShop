@@ -60,4 +60,8 @@ public class BlindBoxGoods extends BaseEntity {
 
     @ApiModelProperty(value = "商品规格")
     private String specs;
+
+    @ApiModelProperty(value = "元气豆")
+    private Integer sinewyBean;
+
 }

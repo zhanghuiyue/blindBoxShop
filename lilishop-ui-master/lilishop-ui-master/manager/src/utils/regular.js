@@ -93,3 +93,12 @@ export const REQUIRED = {
   required: true,
   message:'请填写参数'
 }
+export const VARCHAR60 = {
+  pattern: /^.{1,60}$/,
+  message: '长度应该限制在1-60个字符'
+}
+export const WHITE_SPACE = {
+  whitespace: true,
+  message: "不可为纯空格",
+}
+
