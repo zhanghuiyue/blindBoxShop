@@ -8,8 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@ApiModel(value = "盲盒分类")
-@TableName("li_blind_box_category")
+@ApiModel(value = "盲盒")
+@TableName("li_blind_box")
 @NoArgsConstructor
 public class BlindBoxCategory extends BaseEntity {
 
@@ -31,5 +31,8 @@ public class BlindBoxCategory extends BaseEntity {
 
     @ApiModelProperty(value = "价格")
     private Double price;
+
+    @ApiModelProperty(value = "盲盒类型，FREE免费，CHARGE收费")
+    private String blindBoxType;
 
 }
