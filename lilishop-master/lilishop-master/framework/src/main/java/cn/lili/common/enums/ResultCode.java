@@ -498,11 +498,10 @@ public enum ResultCode {
 
 
     /**
-     * 订单
+     * 部落
      */
-    ORDER_NOT_EXIT_ERROR(100000,"订单不存在"),
-    ORDER_NOT_PAY_ERROR(100001,"订单未支付"),
-    ORDER_EXTRACT_ERROR(100002,"订单未支付"),
+    BLIND_BOX_NOT_EXIT_ERROR(100000,"盲盒不存在"),
+    BLIND_BOX_EXTRACT_ERROR(100002,"盲盒已开启"),
 
     /**
      * 赠送商品
