@@ -1,11 +1,6 @@
 package cn.lili.modules.blindBox.entity.dos;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.lili.common.enums.PromotionTypeEnum;
-import cn.lili.modules.goods.entity.dos.GoodsSku;
-import cn.lili.modules.promotion.entity.dos.PointsGoods;
-import cn.lili.modules.promotion.entity.dto.KanjiaActivityGoodsDTO;
-import cn.lili.modules.promotion.entity.enums.PromotionsScopeTypeEnum;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -80,11 +75,11 @@ public class PromotionBox extends BaseEntity {
     private Integer quantity;
 
 
-    public PromotionBox(BlindBoxCategory blindBoxCategory) {
-        if (blindBoxCategory != null) {
-            BeanUtil.copyProperties(blindBoxCategory, this, "id", "price");
-            this.boxId = blindBoxCategory.getId();
-            this.originalPrice = blindBoxCategory.getPrice();
+    public PromotionBox(BlindBox blindBox) {
+        if (blindBox != null) {
+            BeanUtil.copyProperties(blindBox, this, "id", "price");
+            this.boxId = blindBox.getId();
+            this.originalPrice = blindBox.getPrice();
         }
     }
 

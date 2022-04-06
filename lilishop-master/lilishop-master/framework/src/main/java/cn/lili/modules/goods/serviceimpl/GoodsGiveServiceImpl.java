@@ -6,18 +6,17 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
+import cn.lili.modules.blindBox.entity.dos.BlindBox;
+import cn.lili.modules.blindBox.entity.dos.Tribe;
+import cn.lili.modules.blindBox.service.BlindBoxService;
+import cn.lili.modules.blindBox.service.TribeService;
 import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.GiveGoodsDTO;
 import cn.lili.modules.goods.entity.enums.ExchangeStatusEnum;
 import cn.lili.modules.goods.entity.enums.GiveStatusEnum;
-import cn.lili.modules.goods.entity.enums.PickUpGoodsStatusEnum;
 import cn.lili.modules.goods.entity.vos.GiveGoodsVO;
-import cn.lili.modules.goods.mapper.BlindBoxGoodsMapper;
 import cn.lili.modules.goods.mapper.GiveGoodsMapper;
 import cn.lili.modules.goods.service.*;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -43,6 +42,10 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
     private GoodsService goodsService;
     @Autowired
     private WarehouseService warehouseService;
+    @Autowired
+    private TribeService tribeService;
+    @Autowired
+    private BlindBoxService blindBoxService;
 
     /**
      * 赠送商品
@@ -60,19 +63,29 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         giveGoods.setGiveStatus(GiveStatusEnum.GIVE.name());
         giveGoods.setStartTime(new Date());
         giveGoods.setGiveMemberId(currentUser.getId());
+        giveGoods.setWarehouseTribeId(giveGoodsDTO.getId());
         this.save(giveGoods);
         LambdaQueryWrapper<GiveGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(GiveGoods::getGiveCode,giveCode);
         GiveGoods goods = this.baseMapper.selectOne(queryWrapper);
-        LambdaUpdateWrapper<Warehouse> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(Warehouse::getGoodsId,giveGoodsDTO.getGiveGoodsId());
-        if(StringUtils.isNotBlank(goods.getGiveSkuId())) {
-            updateWrapper.eq(Warehouse::getSkuId, giveGoodsDTO.getGiveSkuId());
+        if(!"3".equals(giveGoodsDTO.getGiveGoodsType())) {
+            LambdaUpdateWrapper<Warehouse> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Warehouse::getGoodsId, giveGoodsDTO.getGiveGoodsId());
+            if (StringUtils.isNotBlank(goods.getGiveSkuId())) {
+                updateWrapper.eq(Warehouse::getSkuId, giveGoodsDTO.getGiveSkuId());
+            }
+            updateWrapper.eq(Warehouse::getMemberId, currentUser.getId());
+            updateWrapper.eq(Warehouse::getGoodsType, giveGoodsDTO.getGiveGoodsType());
+            updateWrapper.set(Warehouse::getGiveStatus, GiveStatusEnum.GIVE.name());
+            warehouseService.update(updateWrapper);
+        }else {
+            LambdaUpdateWrapper<Tribe> updateWrapper = new LambdaUpdateWrapper<>();
+            updateWrapper.eq(Tribe::getBlindBoxCategory, giveGoodsDTO.getGiveGoodsId());
+            updateWrapper.eq(Tribe::getMemberId, currentUser.getId());
+            updateWrapper.eq(Tribe::getBlindBoxType, giveGoodsDTO.getBlindBoxType());
+            updateWrapper.set(Tribe::getGiveStatus, GiveStatusEnum.GIVE.name());
+            tribeService.update(updateWrapper);
         }
-        updateWrapper.eq(Warehouse::getMemberId,currentUser.getId());
-        updateWrapper.eq(Warehouse::getGoodsType,giveGoodsDTO.getGiveGoodsType());
-        updateWrapper.set(Warehouse::getGiveStatus,GiveStatusEnum.GIVE.name());
-        warehouseService.update(updateWrapper);
         return goods.getId();
     }
 
@@ -94,9 +107,17 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         }
         giveGoods.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
         this.baseMapper.updateById(giveGoods);
-        Warehouse updateWarehouse = warehouseService.queryWarehouse(giveGoods);
-        updateWarehouse.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
-        warehouseService.getBaseMapper().updateById(updateWarehouse);
+        if(!"3".equals(giveGoodsDTO.getGiveGoodsType())) {
+            Warehouse updateWarehouse = new Warehouse();
+            updateWarehouse.setId(giveGoodsDTO.getId());
+            updateWarehouse.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
+            warehouseService.getBaseMapper().updateById(updateWarehouse);
+        }else {
+            Tribe tribe = new Tribe();
+            tribe.setId(giveGoodsDTO.getId());
+            tribe.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
+            tribeService.getBaseMapper().updateById(tribe);
+        }
     }
 
     /**
@@ -113,11 +134,15 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         if("0".equals(goods.getGiveGoodsType())){
             BlindBoxGoods blindBoxGoods = blindBoxGoodsService.getById(goods.getGiveGoodsId());
             BeanUtil.copyProperties(blindBoxGoods,giveGoodsVO);
+        }else if("3".equals(goods.getGiveGoodsType())){
+            BlindBox blindBox =  blindBoxService.getById(goods.getGiveGoodsId());
+            giveGoodsVO.setGoodsName(blindBox.getName());
+            giveGoodsVO.setSmall(blindBox.getImage());
         }else {
             Goods good =  goodsService.getById(goods.getGiveGoodsId());
             giveGoodsVO.setSmall(good.getSmall());
             GoodsSku goodsSku = goodsSkuService.getById(goods.getGiveSkuId());
-            giveGoodsVO.setGoodsName(giveGoodsVO.getGiveCode());
+            giveGoodsVO.setGoodsName(goodsSku.getGoodsName());
             giveGoodsVO.setSpecs(goodsSku.getSimpleSpecs());
         }
         return giveGoodsVO;
@@ -147,15 +172,30 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         goods.setExchangeStatus(ExchangeStatusEnum.EXCHANGE.name());
         goods.setGivedMemberId(currentUser.getId());
         this.baseMapper.updateById(goods);
-        Warehouse updateWarehouse = warehouseService.queryWarehouse(goods);
-        updateWarehouse.setGiveStatus(GiveStatusEnum.GIVEED.name());
-        warehouseService.getBaseMapper().updateById(updateWarehouse);
-        Warehouse insertWarehouse = new Warehouse(currentUser.getId());
-        insertWarehouse.setSubstitutionFlag("1");
-        insertWarehouse.setGoodsType(goods.getGiveGoodsType());
-        insertWarehouse.setGoodsId(goods.getGiveGoodsId());
-        insertWarehouse.setSkuId(goods.getGiveSkuId());
-        warehouseService.getBaseMapper().insert(insertWarehouse);
+        if(!"3".equals(goods.getGiveGoodsType())) {
+            Warehouse updateWarehouse = new Warehouse();
+            updateWarehouse.setId(goods.getWarehouseTribeId());
+            updateWarehouse.setGiveStatus(GiveStatusEnum.GIVEED.name());
+            warehouseService.getBaseMapper().updateById(updateWarehouse);
+            Warehouse insertWarehouse = new Warehouse(currentUser.getId());
+            insertWarehouse.setSubstitutionFlag("1");
+            insertWarehouse.setGoodsType(goods.getGiveGoodsType());
+            insertWarehouse.setGoodsId(goods.getGiveGoodsId());
+            insertWarehouse.setSkuId(goods.getGiveSkuId());
+            warehouseService.getBaseMapper().insert(insertWarehouse);
+        }else {
+            Tribe updateTribe = new Tribe();
+            updateTribe.setId(goods.getWarehouseTribeId());
+            updateTribe.setGiveStatus(GiveStatusEnum.GIVEED.name());
+            tribeService.getBaseMapper().updateById(updateTribe);
+            Tribe tribe = new Tribe();
+            tribe.setGiveStatus(GiveStatusEnum.UNGIVE.name());
+            tribe.setExtractStatus(ExchangeStatusEnum.UNEXCHANGE.name());
+            tribe.setBlindBoxCategory(goods.getGiveGoodsId());
+            BlindBox blindBox =  blindBoxService.getById(goods.getGiveGoodsId());
+            BeanUtil.copyProperties(blindBox,tribe);
+            tribeService.getBaseMapper().insert(tribe);
+        }
     }
 
     @Override

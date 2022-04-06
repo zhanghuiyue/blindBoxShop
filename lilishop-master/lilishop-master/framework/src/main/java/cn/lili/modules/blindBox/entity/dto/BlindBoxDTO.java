@@ -4,7 +4,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class BlindBoxCategoryDTO {
+public class BlindBoxDTO {
     @ApiModelProperty(value = "id")
     private String id;
 

@@ -1,6 +1,5 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
-import cn.hutool.core.text.CharSequenceUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -8,11 +7,10 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.blindBox.entity.dos.Banner;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
+import cn.lili.modules.blindBox.entity.dos.BlindBox;
 import cn.lili.modules.blindBox.entity.dos.Prize;
 import cn.lili.modules.blindBox.entity.dos.Tribe;
-import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
 import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
@@ -27,22 +25,16 @@ import cn.lili.modules.blindBox.service.TribeService;
 import cn.lili.modules.goods.entity.dos.BlindBoxGoods;
 import cn.lili.modules.goods.service.BlindBoxGoodsService;
 import cn.lili.modules.order.order.entity.dos.BlindBoxOrder;
-import cn.lili.modules.order.order.entity.dos.Order;
-import cn.lili.modules.order.order.entity.dos.Trade;
 import cn.lili.modules.order.order.entity.enums.ExtractStatusEnum;
-import cn.lili.modules.order.order.entity.enums.OrderStatusEnum;
-import cn.lili.modules.order.order.entity.enums.PayStatusEnum;
 import cn.lili.modules.order.order.service.BlindBoxOrderService;
-import cn.lili.modules.order.order.service.OrderService;
-import cn.lili.modules.order.order.service.TradeService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
-import cn.lili.modules.promotion.entity.dto.search.MemberCouponSearchParams;
+import cn.lili.modules.promotion.entity.dto.search.CouponSearchParams;
 import cn.lili.modules.promotion.entity.enums.MemberCouponStatusEnum;
+import cn.lili.modules.promotion.entity.enums.PromotionsStatusEnum;
 import cn.lili.modules.promotion.service.CouponService;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.mybatis.util.PageUtil;
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -59,7 +51,7 @@ import java.util.concurrent.ThreadLocalRandom;
  * 盲盒相关业务层实现
  */
 @Service
-public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,BlindBoxCategory> implements BlindBoxService {
+public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper, BlindBox> implements BlindBoxService {
 
     @Autowired
     private BlindBoxOrderService orderService;
@@ -84,12 +76,12 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
 
     /**
      * 盲盒列表查询
-     * @return List<BlindBoxCategory>
+     * @return List<BlindBox>
      */
     @Override
-    public List<BlindBoxCategory> queryBlindBoxCategoryList() {
-        LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.orderByAsc(BlindBoxCategory::getSortOrder);
+    public List<BlindBox> queryBlindBoxCategoryList() {
+        LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.orderByAsc(BlindBox::getSortOrder);
         return this.baseMapper.selectList(queryWrapper);
     }
 
@@ -144,60 +136,89 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
             //抽奖
             List<BlindBoxGoodsDTO> boxGoods = extract(blindBoxGoods,tribe.getNum());
             //记录奖品
-            LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<>();
+            LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<>();
             if (StringUtils.isNotBlank(tribe.getBlindBoxCategory())) {
-                queryWrapper.eq(BlindBoxCategory::getId, tribe.getBlindBoxCategory());
+                queryWrapper.eq(BlindBox::getId, tribe.getBlindBoxCategory());
             }
-            BlindBoxCategory blindBoxCategory = this.baseMapper.selectOne(queryWrapper);
-            blindBoxPrizeService.batchAddPrize(bulidPrizeList(boxGoods,blindBoxCategory,currentUser.getId()));
+            BlindBox blindBox = this.baseMapper.selectOne(queryWrapper);
+            blindBoxPrizeService.batchAddPrize(bulidPrizeList(boxGoods, blindBox,currentUser.getId()));
             blindBoxGoodsVO.setBlindBoxGoodsDTOS(boxGoods);
         }else if(BlindBoxTypeEnum.FREE.name().equals(tribe.getBlindBoxType())){
             LambdaQueryWrapper<Coupon> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(Coupon::getPromotionStatus, PromotionsStatusEnum.START.name());
             List<Coupon> couponList = couponService.getBaseMapper().selectList(queryWrapper);
-            List<BlindBoxCouponDTO> blindBoxCouponDTOS = extractCoupon(couponList,tribe.getNum());
+            List<Coupon> filterCoupons = filterCoupon(couponList,extractParam.getId());
+            List<BlindBoxCouponDTO> blindBoxCouponDTOS = extractCoupon(filterCoupons,tribe.getNum());
+            //发优惠券
+            List<CouponSearchParams> couponSearchParams = new ArrayList<>();
+            for (BlindBoxCouponDTO blindBoxCouponDTO:blindBoxCouponDTOS) {
+                CouponSearchParams searchParams = new CouponSearchParams();
+                searchParams.setId(blindBoxCouponDTO.getCouponId());
+            }
+            memberCouponService.receiveBuyerCouponList(couponSearchParams);
         }
-
         //修改抽取的状态
         tribe.setExtractStatus(ExtractStatusEnum.EXTRACT.getState());
         tribeService.getBaseMapper().updateById(tribe);
-
         return blindBoxGoodsVO;
     }
 
+    /**
+     * 过滤优惠券
+     * @param couponList
+     * @param memberId
+     * @return
+     */
+    private List<Coupon> filterCoupon(List<Coupon> couponList,String memberId){
+        List<Coupon> coupons = new ArrayList<>();
+        for (Coupon coupon:couponList) {
+            LambdaQueryWrapper<MemberCoupon> queryWrapper = new LambdaQueryWrapper<MemberCoupon>()
+                    .eq(MemberCoupon::getCouponId, coupon.getId())
+                    .eq(MemberCoupon::getMemberId, memberId);
+            long haveCoupons = memberCouponService.count(queryWrapper);
+            if (coupon.getPublishNum() != 0 && coupon.getReceivedNum()!=null && coupon.getReceivedNum() < coupon.getPublishNum()) {
+                if (!coupon.getCouponLimitNum().equals(0) && haveCoupons < coupon.getCouponLimitNum()) {
+                    coupons.add(coupon);
+                }
+            }
+
+        }
+        return coupons;
+    }
     /**
      * 查询盲盒列表
      * @param blindBoxCategorySearchPara
      * @return
      */
     @Override
-    public BlindBoxCategoryVO queryBlindBoxList(BlindBoxCategorySearchParam blindBoxCategorySearchPara) {
-        BlindBoxCategoryVO blindBoxCategoryVO = new BlindBoxCategoryVO();
+    public BlindBoxVO queryBlindBoxList(BlindBoxCategorySearchParam blindBoxCategorySearchPara) {
+        BlindBoxVO blindBoxVO = new BlindBoxVO();
         QueryWrapper queryWrapper = blindBoxCategorySearchPara.queryWrapper();
-        List<BlindBoxCategory> blindBoxCategoryList = this.baseMapper.selectList(queryWrapper);
-        List<BlindBoxCategoryDTO> blindBoxCategoryDTOList = new ArrayList<>();
-        for (BlindBoxCategory blindBoxCategory:blindBoxCategoryList) {
-            BlindBoxCategoryDTO blindBoxCategoryDTO = new BlindBoxCategoryDTO();
-            BeanUtil.copyProperties(blindBoxCategory,blindBoxCategoryDTO);
-            blindBoxCategoryDTOList.add(blindBoxCategoryDTO);
+        List<BlindBox> blindBoxList = this.baseMapper.selectList(queryWrapper);
+        List<BlindBoxDTO> blindBoxDTOList = new ArrayList<>();
+        for (BlindBox blindBox : blindBoxList) {
+            BlindBoxDTO blindBoxDTO = new BlindBoxDTO();
+            BeanUtil.copyProperties(blindBox, blindBoxDTO);
+            blindBoxDTOList.add(blindBoxDTO);
         }
-        blindBoxCategoryVO.setBlindBoxCategoryDTOList(blindBoxCategoryDTOList);
-        return blindBoxCategoryVO;
+        blindBoxVO.setBlindBoxDTOList(blindBoxDTOList);
+        return blindBoxVO;
     }
 
     /**
      * 构建prideList
      * @param blindBoxGoods
-     * @param blindBoxCategory
+     * @param blindBox
      * @return
      */
-    private List<Prize> bulidPrizeList(List<BlindBoxGoodsDTO> blindBoxGoods,BlindBoxCategory blindBoxCategory,String memberId){
+    private List<Prize> bulidPrizeList(List<BlindBoxGoodsDTO> blindBoxGoods, BlindBox blindBox, String memberId){
         List<Prize> prizeList = new ArrayList<>();
         for (BlindBoxGoodsDTO boxGoods :blindBoxGoods) {
             Prize prize= new Prize();
-            prize.setBlindBoxCategory(blindBoxCategory.getId());
+            prize.setBlindBoxId(blindBox.getId());
             prize.setGoodsId(boxGoods.getId());
-            prize.setImage(blindBoxCategory.getImage());
-            prize.setName(blindBoxCategory.getName());
+            prize.setImage(blindBox.getImage());
+            prize.setName(blindBox.getName());
             prize.setMemberId(memberId);
             prize.setSubstitutionFlag("0");
             prize.setSubstitutionNum(0);
@@ -280,31 +301,31 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper,Blin
         return sortOrignalRates.indexOf(random);
     }
     @Override
-    public IPage<BlindBoxCategory> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
+    public IPage<BlindBox> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
         return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
     }
 
     @Override
-    public void addBlindBox(BlindBoxCategoryDTO blindBoxCategoryDTO) {
-        BlindBoxCategory blindBoxCategory = new BlindBoxCategory();
-        BeanUtil.copyProperties(blindBoxCategoryDTO,blindBoxCategory);
-        this.baseMapper.insert(blindBoxCategory);
+    public void addBlindBox(BlindBoxDTO blindBoxDTO) {
+        BlindBox blindBox = new BlindBox();
+        BeanUtil.copyProperties(blindBoxDTO, blindBox);
+        this.baseMapper.insert(blindBox);
     }
 
     @Override
-    public void updateBlindBox(BlindBoxCategoryDTO blindBoxCategoryDTO) {
-        BlindBoxCategory blindBoxCategory = new BlindBoxCategory();
-        BeanUtil.copyProperties(blindBoxCategoryDTO,blindBoxCategory);
-        LambdaUpdateWrapper<BlindBoxCategory> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlindBoxCategory::getId, blindBoxCategoryDTO.getId());
-        this.baseMapper.update(blindBoxCategory,updateWrapper);
+    public void updateBlindBox(BlindBoxDTO blindBoxDTO) {
+        BlindBox blindBox = new BlindBox();
+        BeanUtil.copyProperties(blindBoxDTO, blindBox);
+        LambdaUpdateWrapper<BlindBox> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(BlindBox::getId, blindBoxDTO.getId());
+        this.baseMapper.update(blindBox,updateWrapper);
     }
 
     @Override
     @Transactional
     public void deleteBlindBox(String id) {
-        LambdaQueryWrapper<BlindBoxCategory> queryWrapper = new LambdaQueryWrapper<BlindBoxCategory>();
-        queryWrapper.eq(BlindBoxCategory::getId,id);
+        LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<BlindBox>();
+        queryWrapper.eq(BlindBox::getId,id);
         this.baseMapper.delete(queryWrapper);
         blindBoxPriceService.deleteByCategoryId(id);
     }

@@ -1,6 +1,5 @@
 package cn.lili.modules.blindBox.entity.vo;
 
-import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
 import io.swagger.annotations.ApiModelProperty;

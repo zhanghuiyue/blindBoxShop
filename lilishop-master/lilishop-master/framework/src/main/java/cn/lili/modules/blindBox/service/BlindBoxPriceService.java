@@ -1,7 +1,6 @@
 package cn.lili.modules.blindBox.service;
 
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
 import cn.lili.modules.blindBox.entity.vo.BlindBoxPriceVO;

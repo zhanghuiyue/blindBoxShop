@@ -1,6 +1,7 @@
 package cn.lili.timetask;
 
 import cn.lili.timetask.handler.EveryDayExecute;
+import cn.lili.timetask.handler.EveryDayZeroExecute;
 import cn.lili.timetask.handler.EveryHourExecute;
 import cn.lili.timetask.handler.EveryMinuteExecute;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -32,6 +33,9 @@ public class TimedTaskJobHandler {
 
     @Autowired(required = false)
     private List<EveryDayExecute> everyDayExecutes;
+
+    @Autowired(required = false)
+    private List<EveryDayZeroExecute> everyDayZeroExecutes;
 
     /**
      * 每分钟任务
@@ -93,6 +97,29 @@ public class TimedTaskJobHandler {
         for (int i = 0; i < everyDayExecutes.size(); i++) {
             try {
                 everyDayExecutes.get(i).execute();
+            } catch (Exception e) {
+                log.error("每分钟任务异常", e);
+            }
+        }
+        return ReturnT.SUCCESS;
+    }
+
+    /**
+     * 每日任务
+     *
+     * @throws Exception
+     */
+    @XxlJob("everyDayZeroExecuteJobHandler")
+    public ReturnT<String> everyDayZeroExecuteJobHandler(String param) {
+
+        log.info("每日任务执行");
+        if (everyDayZeroExecutes == null || everyDayZeroExecutes.size() == 0) {
+            return ReturnT.SUCCESS;
+        }
+
+        for (int i = 0; i < everyDayZeroExecutes.size(); i++) {
+            try {
+                everyDayZeroExecutes.get(i).execute();
             } catch (Exception e) {
                 log.error("每分钟任务异常", e);
             }

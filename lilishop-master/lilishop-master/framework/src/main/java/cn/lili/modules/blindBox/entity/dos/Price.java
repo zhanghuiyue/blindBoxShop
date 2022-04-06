@@ -27,8 +27,8 @@ public class Price extends BaseEntity {
     @ApiModelProperty(value = "数量")
     private Integer num;
 
-    @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
+    @ApiModelProperty(value = "盲盒id")
+    private String blindBoxId;
 
     @ApiModelProperty(value = "价格名称")
     private String name;

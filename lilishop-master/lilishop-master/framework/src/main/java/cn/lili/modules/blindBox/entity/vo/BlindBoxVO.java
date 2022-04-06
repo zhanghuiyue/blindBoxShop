@@ -1,12 +1,12 @@
 package cn.lili.modules.blindBox.entity.vo;
 
-import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import java.util.List;
 @Data
-public class BlindBoxCategoryVO {
+public class BlindBoxVO {
     @ApiModelProperty(value = "盲盒类型列表")
-    public List<BlindBoxCategoryDTO> blindBoxCategoryDTOList;
+    public List<BlindBoxDTO> blindBoxDTOList;
 }

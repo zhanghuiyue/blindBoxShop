@@ -30,8 +30,8 @@ public class BlindBoxOrder extends BaseEntity {
     @ApiModelProperty("订单编号")
     private String sn;
 
-    @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
+    @ApiModelProperty(value = "盲盒id")
+    private String blindBoxId;
 
     @ApiModelProperty(value = "盲盒名称")
     private String name;

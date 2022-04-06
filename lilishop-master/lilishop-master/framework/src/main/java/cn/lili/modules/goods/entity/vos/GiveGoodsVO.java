@@ -23,4 +23,5 @@ public class GiveGoodsVO {
 
     @ApiModelProperty(value = "小图路径")
     private String small;
+
 }

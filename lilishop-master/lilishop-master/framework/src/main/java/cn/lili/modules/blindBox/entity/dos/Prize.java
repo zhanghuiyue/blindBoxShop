@@ -34,8 +34,8 @@ public class Prize extends BaseEntity {
     @ApiModelProperty(value = "置换次数")
     private int substitutionNum;
 
-    @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
+    @ApiModelProperty(value = "盲盒id")
+    private String blindBoxId;
 
     @ApiModelProperty(value = "分类图标")
     private String image;

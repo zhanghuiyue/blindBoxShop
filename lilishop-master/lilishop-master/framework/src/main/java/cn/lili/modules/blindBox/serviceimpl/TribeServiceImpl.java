@@ -12,6 +12,7 @@ import cn.lili.modules.blindBox.entity.dos.Tribe;
 import cn.lili.modules.blindBox.entity.dto.BannerPageDTO;
 import cn.lili.modules.blindBox.entity.dto.TribePageDTO;
 import cn.lili.modules.blindBox.entity.vo.BannerVO;
+import cn.lili.modules.blindBox.enums.BlindBoxTypeEnum;
 import cn.lili.modules.blindBox.enums.StatusEnum;
 import cn.lili.modules.blindBox.mapper.BannerMapper;
 import cn.lili.modules.blindBox.mapper.TribeMapper;
@@ -55,6 +56,14 @@ public class TribeServiceImpl extends ServiceImpl<TribeMapper, Tribe> implements
         queryWrapper.eq(Tribe::getExtractStatus, ExtractStatusEnum.UNEXTRACT.getState());
         queryWrapper.eq(Tribe::getStatus, StatusEnum.VALID.name());
         return this.page(PageUtil.initPage(page), queryWrapper);
+    }
+
+    @Override
+    public List<Tribe> queryTribelist() {
+        LambdaQueryWrapper<Tribe> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Tribe::getExtractStatus,ExtractStatusEnum.UNEXTRACT.getState());
+        queryWrapper.eq(Tribe::getBlindBoxType, BlindBoxTypeEnum.FREE.name());
+        return this.baseMapper.selectList(queryWrapper);
     }
 
 

@@ -4,6 +4,8 @@ import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.json.JSONUtil;
 import cn.lili.common.utils.StringUtils;
+import cn.lili.modules.blindBox.entity.dos.Tribe;
+import cn.lili.modules.blindBox.service.TribeService;
 import cn.lili.modules.goods.entity.dos.GiveGoods;
 import cn.lili.modules.goods.entity.dos.Warehouse;
 import cn.lili.modules.goods.entity.enums.GiveStatusEnum;
@@ -54,6 +56,9 @@ public class CancelGiveGoodsTaskExecute implements EveryMinuteExecute {
     @Autowired
     private WarehouseService warehouseService;
 
+    @Autowired
+    private TribeService tribeService;
+
     @Override
     public void execute() {
         Setting setting = settingService.get(SettingEnum.GIVE_SETTING.name());
@@ -71,11 +76,21 @@ public class CancelGiveGoodsTaskExecute implements EveryMinuteExecute {
                 goodsGiveService.systemCancel(sn, "超时未领取自动取消");
             }
             List<Warehouse> warehouseList = new ArrayList<>();
+            List<Tribe> tribeList = new ArrayList<>();
             for (GiveGoods giveGoods:list) {
-                Warehouse warehouse = warehouseService.queryWarehouse(giveGoods);
-                warehouse.setGiveStatus(GiveStatusEnum.AUTOUNGIVE.name());
-                warehouseList.add(warehouse);
+                if(!"3".equals(giveGoods.getGiveGoodsType())) {
+                    Warehouse warehouse = new Warehouse();
+                    warehouse.setId(giveGoods.getWarehouseTribeId());
+                    warehouse.setGiveStatus(GiveStatusEnum.AUTOUNGIVE.name());
+                    warehouseList.add(warehouse);
+                }else if("3".equals(giveGoods.getGiveGoodsType())){
+                    Tribe tribe = new Tribe();
+                    tribe.setId(giveGoods.getWarehouseTribeId());
+                    tribe.setGiveStatus(GiveStatusEnum.AUTOUNGIVE.name());
+                    tribeList.add(tribe);
+                }
             }
+            tribeService.updateBatchById(tribeList);
             warehouseService.updateBatchById(warehouseList);
         }
     }

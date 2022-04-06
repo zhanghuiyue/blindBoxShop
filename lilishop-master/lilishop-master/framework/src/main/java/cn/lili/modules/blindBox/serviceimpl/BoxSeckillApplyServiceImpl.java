@@ -1,13 +1,12 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
+import cn.lili.modules.blindBox.entity.dos.BlindBox;
 import cn.lili.modules.blindBox.entity.dos.BoxSeckill;
 import cn.lili.modules.blindBox.entity.dos.BoxSeckillApply;
 import cn.lili.modules.blindBox.entity.dto.search.SeckillBoxSearchParams;
@@ -186,13 +185,13 @@ public class BoxSeckillApplyServiceImpl extends ServiceImpl<BoxSeckillApplyMappe
         if (!seckillApplyList.isEmpty()) {
             List<BoxSeckillApply> collect = seckillApplyList.stream().filter(i -> i.getTimeLine().equals(startTimeline) && i.getPromotionApplyStatus().equals(PromotionsApplyStatusEnum.PASS.name())).collect(Collectors.toList());
             for (BoxSeckillApply seckillApply : collect) {
-                BlindBoxCategory blindBoxCategory = blindBoxService.getById(seckillApply.getBoxId());
-                if (blindBoxCategory != null) {
+                BlindBox blindBox = blindBoxService.getById(seckillApply.getBoxId());
+                if (blindBox != null) {
                     BoxSeckillBoxVO boxSeckillBoxVO = new BoxSeckillBoxVO();
                     BeanUtil.copyProperties(seckillApply, boxSeckillBoxVO);
-                    boxSeckillBoxVO.setImage(blindBoxCategory.getImage());
-                    boxSeckillBoxVO.setBoxId(blindBoxCategory.getId());
-                    boxSeckillBoxVO.setName(blindBoxCategory.getName());
+                    boxSeckillBoxVO.setImage(blindBox.getImage());
+                    boxSeckillBoxVO.setBoxId(blindBox.getId());
+                    boxSeckillBoxVO.setName(blindBox.getName());
                     seckillBoxVoS.add(boxSeckillBoxVO);
                 }
             }

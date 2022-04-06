@@ -31,7 +31,7 @@ public class GiveGoods extends BaseEntity {
         @ApiModelProperty(value = "赠送商品sku编号")
         private String giveSkuId;
 
-        @ApiModelProperty(value = "赠送商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示赠送商品")
+        @ApiModelProperty(value = "赠送商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示盲盒")
         private String giveGoodsType;
 
         @ApiModelProperty(value = "赠送人")
@@ -39,6 +39,9 @@ public class GiveGoods extends BaseEntity {
 
         @ApiModelProperty(value = "被赠送人")
         private String givedMemberId;
+
+        @ApiModelProperty(value = "仓库id或者部落id")
+        private String warehouseTribeId;
 
         @ApiModelProperty(value = "兑换状态，UNEXCHANGE：未兑换，EXCHANGE:兑换")
         private String exchangeStatus;

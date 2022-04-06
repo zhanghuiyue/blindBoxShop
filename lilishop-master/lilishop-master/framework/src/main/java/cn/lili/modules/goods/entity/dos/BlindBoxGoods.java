@@ -55,8 +55,8 @@ public class BlindBoxGoods extends BaseEntity {
     @ApiModelProperty(value = "中奖概率")
     private Double probability;
 
-    @ApiModelProperty(value = "种类id")
-    private Float blindBoxCategory;
+    @ApiModelProperty(value = "盲盒id")
+    private Float blindBoxId;
 
     @ApiModelProperty(value = "商品规格")
     private String specs;

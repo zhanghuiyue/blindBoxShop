@@ -6,15 +6,14 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
-import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
+import cn.lili.modules.blindBox.entity.dos.BlindBox;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.service.BlindBoxPriceService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -37,17 +36,17 @@ public class BlindBoxController {
 
     @ApiOperation(value = "盲盒列表查询")
     @GetMapping("/list")
-    public ResultMessage<BlindBoxCategoryVO> queryBlindBoxCategoryList() {
-        List<BlindBoxCategory>  blindBoxCategoryList =blindBoxService.queryBlindBoxCategoryList();
-        BlindBoxCategoryVO blindBoxCategoryVO = new BlindBoxCategoryVO();
-        List<BlindBoxCategoryDTO> blindBoxCategoryDTOList = new ArrayList<>();
-        for (BlindBoxCategory blindBoxCategory:blindBoxCategoryList){
-            BlindBoxCategoryDTO blindBoxCategoryDTO = new BlindBoxCategoryDTO();
-            BeanUtil.copyProperties(blindBoxCategory, blindBoxCategoryDTO);
-            blindBoxCategoryDTOList.add(blindBoxCategoryDTO);
+    public ResultMessage<BlindBoxVO> queryBlindBoxCategoryList() {
+        List<BlindBox> blindBoxList =blindBoxService.queryBlindBoxCategoryList();
+        BlindBoxVO blindBoxVO = new BlindBoxVO();
+        List<BlindBoxDTO> blindBoxDTOList = new ArrayList<>();
+        for (BlindBox blindBox : blindBoxList){
+            BlindBoxDTO blindBoxDTO = new BlindBoxDTO();
+            BeanUtil.copyProperties(blindBox, blindBoxDTO);
+            blindBoxDTOList.add(blindBoxDTO);
         }
-        blindBoxCategoryVO.blindBoxCategoryDTOList=blindBoxCategoryDTOList;
-        return ResultUtil.data(blindBoxCategoryVO);
+        blindBoxVO.blindBoxDTOList = blindBoxDTOList;
+        return ResultUtil.data(blindBoxVO);
     }
 
     @ApiOperation(value = "盲盒价格列表查询")
@@ -73,7 +72,7 @@ public class BlindBoxController {
 
     @ApiOperation(value = "搜索页盲盒列表查询")
     @PostMapping(value = "/search/list", consumes = "application/json", produces = "application/json")
-    public ResultMessage<BlindBoxCategoryVO> queryBlindBoxList(@RequestBody BlindBoxCategorySearchParam blindBoxCategorySearchParam) {
+    public ResultMessage<BlindBoxVO> queryBlindBoxList(@RequestBody BlindBoxCategorySearchParam blindBoxCategorySearchParam) {
         return ResultUtil.data(blindBoxService.queryBlindBoxList(blindBoxCategorySearchParam));
     }
 

@@ -3,8 +3,8 @@ package cn.lili.controller.blindBox;
 import cn.lili.common.enums.ResultUtil;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.ResultMessage;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
-import cn.lili.modules.blindBox.entity.dto.BlindBoxCategoryDTO;
+import cn.lili.modules.blindBox.entity.dos.BlindBox;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.service.BlindBoxService;
@@ -31,37 +31,37 @@ public class BlindBoxController {
 
    @ApiOperation(value = "盲盒列表查询")
     @GetMapping("/list")
-    public ResultMessage<BlindBoxCategoryVO> queryBlindBoxCategoryList() {
-        List<BlindBoxCategory>  blindBoxCategoryList =blindBoxService.queryBlindBoxCategoryList();
-        BlindBoxCategoryVO blindBoxCategoryVO = new BlindBoxCategoryVO();
-        List<BlindBoxCategoryDTO> blindBoxCategoryDTOList = new ArrayList<>();
-        for (BlindBoxCategory blindBoxCategory:blindBoxCategoryList){
-            BlindBoxCategoryDTO blindBoxCategoryDTO = new BlindBoxCategoryDTO();
-            BeanUtil.copyProperties(blindBoxCategory, blindBoxCategoryDTO);
-            blindBoxCategoryDTOList.add(blindBoxCategoryDTO);
+    public ResultMessage<BlindBoxVO> queryBlindBoxCategoryList() {
+        List<BlindBox> blindBoxList =blindBoxService.queryBlindBoxCategoryList();
+        BlindBoxVO blindBoxVO = new BlindBoxVO();
+        List<BlindBoxDTO> blindBoxDTOList = new ArrayList<>();
+        for (BlindBox blindBox : blindBoxList){
+            BlindBoxDTO blindBoxDTO = new BlindBoxDTO();
+            BeanUtil.copyProperties(blindBox, blindBoxDTO);
+            blindBoxDTOList.add(blindBoxDTO);
         }
-        blindBoxCategoryVO.blindBoxCategoryDTOList=blindBoxCategoryDTOList;
-        return ResultUtil.data(blindBoxCategoryVO);
+        blindBoxVO.blindBoxDTOList = blindBoxDTOList;
+        return ResultUtil.data(blindBoxVO);
     }
 
 
     @ApiOperation(value = "分页获取盲盒列表")
     @GetMapping(value = "/getByPage")
-    public ResultMessage<IPage<BlindBoxCategory>> getBoxByPage(BoxSearchParams boxSearchParams) {
+    public ResultMessage<IPage<BlindBox>> getBoxByPage(BoxSearchParams boxSearchParams) {
         return ResultUtil.data(blindBoxService.getBlindBoxCategoryByPage(boxSearchParams));
     }
 
     @ApiOperation(value = "添加盲盒")
     @PostMapping(value = "/add")
-    public ResultMessage add(@RequestBody BlindBoxCategoryDTO blindBoxCategoryDTO) {
-        blindBoxService.addBlindBox(blindBoxCategoryDTO);
+    public ResultMessage add(@RequestBody BlindBoxDTO blindBoxDTO) {
+        blindBoxService.addBlindBox(blindBoxDTO);
         return ResultUtil.success();
     }
 
     @ApiOperation(value = "更新盲盒")
     @PutMapping(value = "/update")
-    public ResultMessage update (@RequestBody BlindBoxCategoryDTO blindBoxCategoryDTO) {
-        blindBoxService.updateBlindBox(blindBoxCategoryDTO);
+    public ResultMessage update (@RequestBody BlindBoxDTO blindBoxDTO) {
+        blindBoxService.updateBlindBox(blindBoxDTO);
         return ResultUtil.success();
     }
 

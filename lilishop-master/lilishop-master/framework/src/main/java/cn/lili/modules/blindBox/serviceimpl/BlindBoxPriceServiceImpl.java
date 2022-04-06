@@ -2,29 +2,23 @@ package cn.lili.modules.blindBox.serviceimpl;
 
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.PageVO;
-import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
 import cn.lili.modules.blindBox.entity.vo.BlindBoxPriceVO;
 import cn.lili.modules.blindBox.mapper.PriceMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPriceService;
-import cn.lili.modules.goods.entity.vos.CategoryVO;
-import cn.lili.modules.member.service.MemberService;
 import cn.lili.modules.promotion.entity.dos.MemberCoupon;
 import cn.lili.modules.promotion.service.MemberCouponService;
 import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.swagger.annotations.ApiModelProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.text.DecimalFormat;
 import java.util.*;
 
 /**
@@ -49,7 +43,7 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
         List<BlindBoxCouponDTO> canUseCouponList = new ArrayList<>();
         List<BlindBoxCouponDTO> unUseCouponList = new ArrayList<>();
         LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Price::getBlindBoxCategory,categoryId);
+        queryWrapper.eq(Price::getBlindBoxId,categoryId);
         List<Price> priceList = this.baseMapper.selectList(queryWrapper);
         List<MemberCoupon> canUseCoupons = null;
         List<MemberCoupon> unUsedCoupons = null;
@@ -121,7 +115,7 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
     @Override
     public void deleteByCategoryId(String categoryId) {
         LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Price::getBlindBoxCategory,categoryId);
+        queryWrapper.eq(Price::getBlindBoxId,categoryId);
         this.baseMapper.delete(queryWrapper);
     }
 
@@ -132,7 +126,7 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
 
     @Override
      public List<String> batchQuery(List<String> categoryIds) {
-        List<Price> prices = new LambdaQueryChainWrapper<Price>(this.baseMapper).ge(Price::getBlindBoxCategory,categoryIds).list();
+        List<Price> prices = new LambdaQueryChainWrapper<Price>(this.baseMapper).ge(Price::getBlindBoxId,categoryIds).list();
         List<String> ids = new ArrayList<>();
         for (Price price:prices) {
             ids.add(price.getId());
