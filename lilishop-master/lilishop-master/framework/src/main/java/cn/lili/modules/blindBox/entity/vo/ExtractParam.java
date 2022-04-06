@@ -11,12 +11,9 @@ import javax.validation.constraints.NotBlank;
 @Data
 public class ExtractParam {
 
-    @ApiModelProperty("订单编号")
-    @NotBlank(message = "订单编号为空")
-    private String sn;
-
-    @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
+    @ApiModelProperty("部落编号")
+    @NotBlank(message = "部落编号为空")
+    private String id;
 
 
 }

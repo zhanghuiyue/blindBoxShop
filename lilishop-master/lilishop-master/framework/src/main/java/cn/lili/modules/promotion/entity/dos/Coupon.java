@@ -91,6 +91,9 @@ public class Coupon extends BasePromotions {
     @ApiModelProperty(value = "盲盒名称")
     private String name;
 
+    @ApiModelProperty(value = "中奖概率")
+    private Double probability;
+
     public Coupon(CouponVO couponVO) {
         BeanUtils.copyProperties(couponVO, this);
     }

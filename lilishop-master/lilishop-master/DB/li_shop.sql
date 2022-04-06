@@ -33,8 +33,8 @@ CREATE TABLE `li_prize` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
-drop table li_blind_box_category
-CREATE TABLE `li_blind_box_category` (
+drop table li_blind_box
+CREATE TABLE `li_blind_box` (
   `id` BIGINT NOT NULL COMMENT 'ID',
   `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
   `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
@@ -46,6 +46,7 @@ CREATE TABLE `li_blind_box_category` (
   `sort_order` INT DEFAULT NULL COMMENT '排序值',
   `label` VARCHAR(255) DEFAULT NULL COMMENT '盲盒的标签',
   `price` DOUBLE(10,2) DEFAULT NULL COMMENT '价格',
+  `blind_box_type` VARCHAR(15) DEFAULT NULL COMMENT '盲盒类型，FREE免费，CHARGE收费',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -58,6 +59,7 @@ CREATE TABLE `li_blind_box_goods` (
   `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
   `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
   `auth_message` INT DEFAULT NULL COMMENT '审核信息',
+  `goods_type` VARCHAR(20) DEFAULT NULL COMMENT '商品类型，PHYSICAL_GOODS实物商品，VIRTUAL_GOODS虚拟商品，E_COUPON电子卡券',
   `goods_name` VARCHAR(255) DEFAULT NULL COMMENT '商品名称',
   `logo` VARCHAR(255)  DEFAULT NULL COMMENT '品牌图标',
   `brand_intro` VARCHAR(255)  DEFAULT NULL COMMENT '品牌介绍',
@@ -72,7 +74,7 @@ CREATE TABLE `li_blind_box_goods` (
   `specs` VARCHAR(255)  DEFAULT NULL COMMENT '规格信息',
   `probability`DOUBLE(10,2) DEFAULT NULL COMMENT '中奖概率',
   `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
-  PRIMARY KEY (`id`)
+   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 ALTER TABLE li_member_coupon ADD coupon_name VARCHAR(255)DEFAULT NULL COMMENT '优惠券名称';
@@ -145,6 +147,7 @@ alter table `li_goods` add column sinewy_beans INT DEFAULT NULL COMMENT '元气�
 alter table `li_goods_sku` add column sinewy_beans INT DEFAULT NULL COMMENT '元气豆数'
 alter table `li_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
 alter table `li_coupon` add column blind_box_category VARCHAR(255) DEFAULT NULL COMMENT '盲盒的种类编号';
+alter table `li_coupon` add column `probability`DOUBLE(10,2) DEFAULT NULL COMMENT '中奖概率';
 alter table `li_coupon` add column name VARCHAR(255) DEFAULT NULL COMMENT '盲盒名称';
 alter table `li_coupon_activity` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
 alter table `li_member_coupon` add column goods_type char(1) DEFAULT NULL COMMENT '商品类型，0普通商品，1盲盒商品';
@@ -170,6 +173,26 @@ CREATE TABLE `li_give_goods` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
+drop table li_tribe
+CREATE TABLE `li_tribe` (
+  `id` BIGINT NOT NULL COMMENT 'ID',
+  `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
+  `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
+  `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
+  `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
+  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `num` INT DEFAULT NULL COMMENT '数量',
+  `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
+  `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
+  `blind_box_type` VARCHAR(15) DEFAULT NULL COMMENT '盲盒类型，FREE免费，CHARGE收费',
+  `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员编号',
+	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:未赠送，CANCELGIVE：取消赠送，AUTOUNGIVE：自动取消赠送，GIVEED已赠送',
+	`extract_status` VARCHAR(1) DEFAULT NULL COMMENT '抽取的状态，0表示未抽取，1表示已抽取',
+	`status` VARCHAR(15) DEFAULT NULL COMMENT '盲盒的状态，VALID表示有效状态，UNVALID表示无效状态',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
 drop table li_warehouse
 CREATE TABLE `li_warehouse` (
   `id` BIGINT NOT NULL COMMENT 'ID',
@@ -190,4 +213,3 @@ CREATE TABLE `li_warehouse` (
 	`receive_status` VARCHAR(15) DEFAULT NULL COMMENT '领取状态，RECEIVE：领取，UNRECEIVE:未领取',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
-

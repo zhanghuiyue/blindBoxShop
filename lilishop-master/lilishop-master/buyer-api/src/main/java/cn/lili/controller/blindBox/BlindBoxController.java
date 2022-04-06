@@ -70,6 +70,7 @@ public class BlindBoxController {
         return ResultUtil.data(blindBoxService.blindBoxExtract(extractParam));
     }
 
+
     @ApiOperation(value = "搜索页盲盒列表查询")
     @PostMapping(value = "/search/list", consumes = "application/json", produces = "application/json")
     public ResultMessage<BlindBoxCategoryVO> queryBlindBoxList(@RequestBody BlindBoxCategorySearchParam blindBoxCategorySearchParam) {
