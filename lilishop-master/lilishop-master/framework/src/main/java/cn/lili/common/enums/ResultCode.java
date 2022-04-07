@@ -508,10 +508,30 @@ public enum ResultCode {
      */
     GOODS_EXCHANGE_ERROR(120000,"赠送商品已领取或者已超时"),
     GOODS_EXCHANGE_MEMBER_ERROR(120001,"自己不能领取商品"),
-    GOODS_NOT_EXIT_ERROR(120002,"赠送商品不存在");
+    GOODS_NOT_EXIT_ERROR(120002,"赠送商品不存在"),
+
+    /**
+     * 盲盒类型
+     */
+    BLIND_BOX_CATEGORY_SAVE_ERROR(130000, "盲盒类型添加失败"),
+    BLIND_BOX_CATEGORY_UPDATE_ERROR(130001, "盲盒类型修改失败"),
+    BLIND_BOX_CATEGORY_DISABLE_ERROR(130002, "盲盒类型禁用失败"),
+    BLIND_BOX_CATEGORY_DELETE_ERROR(130003, "盲盒类型删除失败"),
+    BLIND_BOX_CATEGORY_NAME_EXIST_ERROR(130004, "盲盒类型名称重复！"),
+    BLIND_BOX_CATEGORY_USE_DISABLE_ERROR(130005, "盲盒类型已经绑定盲盒，请先解除关联"),
+    BLIND_BOX_CATEGORY_NOT_EXIST(130006, "盲盒类型不存在"),
 
 
-
+    /**
+     * 盲盒
+     */
+    BLIND_BOX_SAVE_ERROR(140000, "盲盒添加失败"),
+    BLIND_BOX_UPDATE_ERROR(140001, "盲盒修改失败"),
+    BLIND_BOX_DISABLE_ERROR(140002, "盲盒禁用失败"),
+    BLIND_BOX_DELETE_ERROR(140003, "盲盒删除失败"),
+    BLIND_BOX_NAME_EXIST_ERROR(140004, "盲盒名称重复！"),
+    BLIND_BOX_USE_DISABLE_ERROR(140005, "盲盒已经绑定盲盒，请先解除关联"),
+    BLIND_BOX_NOT_EXIST(140006, "盲盒不存在");
 
     private final Integer code;
     private final String message;

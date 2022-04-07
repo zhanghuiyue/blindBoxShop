@@ -1,5 +1,7 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
+import cn.hutool.core.text.CharSequenceUtil;
+import cn.hutool.json.JSONUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.security.AuthUser;
@@ -7,16 +9,14 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
-import cn.lili.modules.blindBox.entity.dos.BlindBox;
-import cn.lili.modules.blindBox.entity.dos.Prize;
-import cn.lili.modules.blindBox.entity.dos.Tribe;
+import cn.lili.modules.blindBox.entity.dos.*;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxGoodsDTO;
 import cn.lili.modules.blindBox.entity.dto.search.BoxSearchParams;
 import cn.lili.modules.blindBox.entity.vo.*;
 import cn.lili.modules.blindBox.enums.BlindBoxTypeEnum;
-import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
+import cn.lili.modules.blindBox.mapper.BlindBoxMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPriceService;
 import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
@@ -46,12 +46,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
 
 /**
  * 盲盒相关业务层实现
  */
 @Service
-public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper, BlindBox> implements BlindBoxService {
+public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxMapper, BlindBox> implements BlindBoxService {
 
     @Autowired
     private BlindBoxOrderService orderService;
@@ -302,32 +303,37 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper, Bli
     }
     @Override
     public IPage<BlindBox> getBlindBoxCategoryByPage(BoxSearchParams searchParams) {
-        return this.page(PageUtil.initPage(searchParams), searchParams.queryWrapper());
+        LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<>();
+        if (CharSequenceUtil.isNotEmpty(searchParams.getName())) {
+            queryWrapper.like(BlindBox::getName, searchParams.getName());
+        }
+        return this.page(PageUtil.initPage(searchParams), queryWrapper);
     }
 
     @Override
-    public void addBlindBox(BlindBoxDTO blindBoxDTO) {
+    public boolean addBlindBox(BlindBoxDTO blindBoxDTO) {
         BlindBox blindBox = new BlindBox();
         BeanUtil.copyProperties(blindBoxDTO, blindBox);
-        this.baseMapper.insert(blindBox);
+        if (getOne(new LambdaQueryWrapper<BlindBox>().eq(BlindBox::getName, blindBox.getName())) != null) {
+            throw new ServiceException(ResultCode.BLIND_BOX_NAME_EXIST_ERROR);
+        }
+        return this.save(blindBox);
     }
 
     @Override
-    public void updateBlindBox(BlindBoxDTO blindBoxDTO) {
+    public boolean updateBlindBox(BlindBoxDTO blindBoxDTO) {
         BlindBox blindBox = new BlindBox();
         BeanUtil.copyProperties(blindBoxDTO, blindBox);
-        LambdaUpdateWrapper<BlindBox> updateWrapper = new LambdaUpdateWrapper<>();
-        updateWrapper.eq(BlindBox::getId, blindBoxDTO.getId());
-        this.baseMapper.update(blindBox,updateWrapper);
+        if (getOne(new LambdaQueryWrapper<BlindBox>().eq(BlindBox::getName, blindBox.getName()).ne(BlindBox::getId, blindBox.getId())) != null) {
+            throw new ServiceException(ResultCode.BLIND_BOX_NAME_EXIST_ERROR);
+        }
+        return this.updateById(blindBox);
     }
 
     @Override
-    @Transactional
-    public void deleteBlindBox(String id) {
-        LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<BlindBox>();
-        queryWrapper.eq(BlindBox::getId,id);
-        this.baseMapper.delete(queryWrapper);
-        blindBoxPriceService.deleteByCategoryId(id);
+    public boolean deleteBlindBox(String id) {
+        checkBind(id);
+        return this.removeById(id);
     }
 
     @Override
@@ -338,4 +344,46 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxCategoryMapper, Bli
     }
 
 
+    @Override
+    public boolean blindBoxDisable(String id, boolean disable) {
+        BlindBox blindBox = this.checkExist(id);
+        //如果是要禁用，则需要先判定绑定关系
+        if (Boolean.TRUE.equals(disable)) {
+            checkBind(id);
+        }
+        blindBox.setDeleteFlag(disable);
+        return updateById(blindBox);
+    }
+
+
+
+    /**
+     * 验证绑定关系
+     * @param id
+     */
+    private void checkBind(String id){
+        LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Price::getBlindBoxId,id);
+        List<Price> priceList = blindBoxPriceService.getBaseMapper().selectList(queryWrapper);
+        if(!priceList.isEmpty()) {
+            List<String> names = priceList.stream().map(Price::getName).collect(Collectors.toList());
+            throw new ServiceException(ResultCode.BLIND_BOX_CATEGORY_USE_DISABLE_ERROR,
+                    JSONUtil.toJsonStr(names));
+        }
+    }
+
+    /**
+     * 校验是否存在
+     *
+     * @param id 分类ID
+     * @return
+     */
+    private BlindBox checkExist(String id) {
+        BlindBox blindBox = getById(id);
+        if (blindBox == null) {
+            log.error("盲盒ID为" + id + "的盲盒不存在");
+            throw new ServiceException(ResultCode.BLIND_BOX_NOT_EXIST);
+        }
+        return blindBox;
+    }
 }

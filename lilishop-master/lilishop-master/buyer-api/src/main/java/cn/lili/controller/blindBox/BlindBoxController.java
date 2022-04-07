@@ -7,8 +7,10 @@ import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.blindBox.entity.dos.BlindBox;
+import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.blindBox.entity.vo.*;
+import cn.lili.modules.blindBox.service.BlindBoxCategoryService;
 import cn.lili.modules.blindBox.service.BlindBoxPriceService;
 import cn.lili.modules.blindBox.service.BlindBoxService;
 import io.swagger.annotations.Api;
@@ -33,7 +35,8 @@ public class BlindBoxController {
     private BlindBoxService blindBoxService;
     @Autowired
     private BlindBoxPriceService blindBoxPriceService;
-
+    @Autowired
+    private BlindBoxCategoryService blindBoxCategoryService;
     @ApiOperation(value = "盲盒列表查询")
     @GetMapping("/list")
     public ResultMessage<BlindBoxVO> queryBlindBoxCategoryList() {
@@ -74,6 +77,13 @@ public class BlindBoxController {
     @PostMapping(value = "/search/list", consumes = "application/json", produces = "application/json")
     public ResultMessage<BlindBoxVO> queryBlindBoxList(@RequestBody BlindBoxCategorySearchParam blindBoxCategorySearchParam) {
         return ResultUtil.data(blindBoxService.queryBlindBoxList(blindBoxCategorySearchParam));
+    }
+
+    @ApiOperation(value = "搜索页盲盒类型列表查询")
+    @GetMapping("/category/list")
+    public ResultMessage<List<BlindBoxCategory>> queryBlindBoxCategory() {
+        return ResultUtil.data(blindBoxCategoryService.getBlindBoxCategoryList());
+
     }
 
 }

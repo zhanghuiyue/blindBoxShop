@@ -488,6 +488,11 @@ public enum CachePrefix {
     BOXBANNER,
 
     /**
+     * 盲盒分类
+     */
+    BOXCATEGORY,
+
+    /**
      * 敏感词
      */
     SENSITIVE;

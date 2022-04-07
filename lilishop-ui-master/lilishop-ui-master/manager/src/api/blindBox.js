@@ -44,3 +44,29 @@ export function createGoods(params) {
   });
 }
 
+//  获取盲盒分页列表
+export const getBlindBoxPage = (params) => {
+  return getRequest('/blind-box/getByPage', params)
+}
+
+// 删除
+export const delBlindBox = (id) =>{
+  return deleteRequest(`/blind-box/delete/${id}`)
+}
+
+//  添加
+export const addBlindBox = (params) => {
+  return postRequest('/blind-box/add', params)
+}
+// 修改品牌设置
+export const updateBlindBox = (params) => {
+  return putRequest(`/blind-box/update/${params.id}`, params)
+}
+// 禁用品牌
+export const disableBlindBox = (id, params) => {
+  return putRequest(`/blind-box/disable/${id}`, params)
+}
+//  获取盲盒分类列表
+export const getBlindBoxCategoryList = (params) => {
+  return getRequest('/blind-box/category/list', params)
+}

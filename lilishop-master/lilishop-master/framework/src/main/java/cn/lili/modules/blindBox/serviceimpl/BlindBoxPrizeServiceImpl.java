@@ -1,7 +1,6 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
 import cn.lili.modules.blindBox.entity.dos.Prize;
-import cn.lili.modules.blindBox.mapper.BlindBoxCategoryMapper;
 import cn.lili.modules.blindBox.mapper.PrizeMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPrizeService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
