@@ -23,7 +23,24 @@ export const disableBanner = (id, params) => {
 }
 
 //获取所有可用banner
-export const getBannerListData = (params) => {
-    return getRequest('/blind-box/recommendBanner/all', params)
+export const getBannerListData = () => {
+    return getRequest('/blind-box/recommendBanner/all')
+}
+
+// 获取盲盒分页列表
+export const getBoxListData = (params) => {
+  return getRequest('/blind-box/getByPage', params)
+}
+
+
+// 获取盲盒列表
+export const getBoxList = (params) => {
+  return getRequest('/blind-box/list', params)
+}
+
+export function createGoods(params) {
+  return postRequest("/blind-box/goods/create", params, {
+    "Content-Type": "application/json"
+  });
 }
 
