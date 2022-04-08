@@ -58,13 +58,13 @@ export default {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
-        sort: "sort_order", // 默认排序字段
+        sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
       form: {
         // 添加或编辑表单对象初始化数据
         name: "",
-        sort: "",
+        sortOrder: "",
         deleteFlag: "",
       },
       // 表单验证规则
@@ -73,7 +73,7 @@ export default {
           regular.REQUIRED,
           regular.VARCHAR20
         ],
-        sort: [
+        sortOrder: [
           regular.REQUIRED,
           regular.INTEGER
         ],
@@ -217,7 +217,7 @@ export default {
     };
   },
   methods: {
-    // 删除品牌
+    // 删除品类
     async delBlindBoxCategory(id) {
       let res = await delBlindBoxCategory(id);
 

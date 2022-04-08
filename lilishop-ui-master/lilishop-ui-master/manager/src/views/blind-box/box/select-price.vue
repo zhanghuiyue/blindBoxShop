@@ -3,8 +3,8 @@
     <Card>
       <Form ref="searchForm" @keydown.enter.native="handleSearch" :model="searchForm" inline :label-width="70"
             class="search-form">
-        <Form-item label="分类名称">
-          <Input type="text" v-model="searchForm.name" placeholder="请输入分类名称" clearable style="width: 200px"/>
+        <Form-item label="价格名称">
+          <Input type="text" v-model="searchForm.name" placeholder="请输入价格名称" clearable style="width: 200px"/>
         </Form-item>
         <Button @click="handleSearch" type="primary">搜索</Button>
       </Form>
@@ -20,11 +20,20 @@
     </Card>
     <Modal :title="modalTitle" v-model="modalVisible" :mask-closable="false" :width="500">
       <Form ref="form" :model="form" :label-width="100" :rules="formValidate">
-        <FormItem label="分类名称" prop="categoryName">
-          <Input v-model="form.categoryName" clearable style="width: 100%"/>
+        <FormItem label="价格名称" prop="name">
+          <Input v-model="form.name" clearable style="width: 100%"/>
         </FormItem>
-        <FormItem label="分类序号" prop="sortOrder">
-          <Input v-model="form.sortOrder" style="width: 100%"></Input>
+       <FormItem label="价格" prop="price">
+          <Input v-model="form.price" clearable style="width: 100%"/>
+       </FormItem>
+       <FormItem label="原价" prop="originalPrice">
+          <Input v-model="form.originalPrice" clearable style="width: 100%"/>
+       </FormItem>
+       <FormItem label="数量" prop="num">
+           <Input v-model="form.num" clearable style="width: 100%"/>
+       </FormItem>
+        <FormItem label="排序值" prop="sortOrder">
+           <Input v-model="form.sortOrder" style="width: 100%"></Input>
         </FormItem>
       </Form>
       <div slot="footer">
@@ -37,34 +46,39 @@
 
 <script>
 import {
-  getBlindBoxCategoryPage,
-  delBlindBoxCategory,
-  addBlindBoxCategory,
-  updateBlindBoxCategory,
-  disableBlindBoxCategory
-} from "@/api/boxCategory";
+  getBlindBoxPricePage,
+  delBlindBoxPrice,
+  addBlindBoxPrice,
+  updateBlindBoxPrice,
+  disableBlindBoxPrice
+} from "@/api/price";
 
 import {regular} from "@/utils";
 
 export default {
-  name: "boxCategory",
+  name: "select-price",
   data() {
     return {
       loading: true, // 表单加载状态
       modalType: 0, // 添加或编辑标识
       modalVisible: false, // 添加或编辑显示
       modalTitle: "", // 添加或编辑标题
+      blindBoxId:"",
       searchForm: {
         // 搜索框初始化对象
         pageNumber: 1, // 当前页数
         pageSize: 10, // 页面大小
-        sort: "sort_order", // 默认排序字段
+        sort: "create_time", // 默认排序字段
         order: "desc", // 默认排序方式
       },
       form: {
         // 添加或编辑表单对象初始化数据
         name: "",
-        sort: "",
+        sortOrder: "",
+        price: "",
+        originalPrice: "",
+        num: "",
+        blindBoxId:"",
         deleteFlag: "",
       },
       // 表单验证规则
@@ -73,27 +87,65 @@ export default {
           regular.REQUIRED,
           regular.VARCHAR20
         ],
-        sort: [
+        sortOrder: [
           regular.REQUIRED,
           regular.INTEGER
+        ],
+        num: [
+          regular.REQUIRED,
+          regular.INTEGER
+        ],
+        originalPrice: [
+          regular.REQUIRED
+        ],
+        price: [
+          regular.REQUIRED
         ],
       },
       submitLoading: false, // 添加或编辑提交状态
       columns: [
         {
-          title: "盲盒类型名称",
-          key: "categoryName",
+          title: "价格名称",
+          key: "name",
           width: 200,
           resizable: true,
           sortable: false,
         },
         {
-          title: "种类排序",
-          key: "sortOrder",
-          width: 200,
+          title: "价格",
+          key: "price",
+          width: 100,
           resizable: true,
           sortable: false,
         },
+        {
+          title: "原价",
+          key: "originalPrice",
+          width: 100,
+          resizable: true,
+          sortable: false,
+        },
+        {
+          title: "数量",
+          key: "num",
+          width: 100,
+          resizable: true,
+          sortable: false,
+        },
+       {
+          title: "盲盒id",
+          key: "blindBoxId",
+          width: 200,
+          resizable: true,
+          sortable: false,
+            },
+       {
+           title: "排序值",
+           key: "sortOrder",
+           width: 100,
+           resizable: true,
+           sortable: false,
+             },
         {
           title: "状态",
           key: "deleteFlag",
@@ -202,7 +254,7 @@ export default {
                   },
                   on: {
                     click: () => {
-                      this.delBlindBoxCategory(params.row.id);
+                      this.delBlindBoxPrice(params.row.id);
                     },
                   },
                 },
@@ -217,17 +269,18 @@ export default {
     };
   },
   methods: {
-    // 删除品牌
-    async delBlindBoxCategory(id) {
-      let res = await delBlindBoxCategory(id);
+    // 删除价格
+    async delBlindBoxPrice(id) {
+      let res = await delBlindBoxPrice(id);
 
       if (res.success) {
-        this.$Message.success("盲盒品类删除成功!");
+        this.$Message.success("盲盒价格删除成功!");
         this.getDataList();
       }
     },
     // 初始化数据
     init() {
+      this.blindBoxId=this.$route.query.blindBoxId;
       this.getDataList();
     },
     // 分页 改变页码
@@ -249,8 +302,8 @@ export default {
     // 获取数据
     getDataList() {
       this.loading = true;
-      getBlindBoxCategoryPage(this.searchForm).then((res) => {
-      console.log("----"+res);
+      this.searchForm.blindBoxId=this.blindBoxId;
+      getBlindBoxPricePage(this.searchForm).then((res) => {
         this.loading = false;
         if (res.success) {
           this.data = res.result.records;
@@ -266,7 +319,8 @@ export default {
           if (this.modalType === 0) {
             // 添加 避免编辑后传入id等数据 记得删除
             delete this.form.id;
-            addBlindBoxCategory(this.form).then((res) => {
+            this.form.blindBoxId = this.blindBoxId;
+            addBlindBoxPrice(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -276,7 +330,7 @@ export default {
             });
           } else {
             // 编辑
-            updateBlindBoxCategory(this.form).then((res) => {
+            updateBlindBoxPrice(this.form).then((res) => {
               this.submitLoading = false;
               if (res.success) {
                 this.$Message.success("操作成功");
@@ -312,14 +366,14 @@ export default {
       this.form = data;
       this.modalVisible = true;
     },
-    // 启用品牌
+    // 启用价格
     enable(v) {
       this.$Modal.confirm({
         title: "确认启用",
-        content: "您确认要启用盲盒品类 " + v.categoryName + " ?",
+        content: "您确认要启用价格名称 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          disableBlindBoxCategory(v.id, {disable: false}).then((res) => {
+          disableBlindBoxPrice(v.id, {disable: false}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");
@@ -333,10 +387,10 @@ export default {
     disable(v) {
       this.$Modal.confirm({
         title: "确认禁用",
-        content: "您确认要禁用盲盒品类 " + v.categoryName + " ?",
+        content: "您确认要禁用价格名称 " + v.name + " ?",
         loading: true,
         onOk: () => {
-          disableBlindBoxCategory(v.id, {disable: true}).then((res) => {
+          disableBlindBoxPrice(v.id, {disable: true}).then((res) => {
             this.$Modal.remove();
             if (res.success) {
               this.$Message.success("操作成功");

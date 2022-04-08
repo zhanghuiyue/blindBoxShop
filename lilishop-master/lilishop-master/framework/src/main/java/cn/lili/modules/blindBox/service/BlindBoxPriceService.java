@@ -3,6 +3,7 @@ package cn.lili.modules.blindBox.service;
 import cn.lili.common.vo.PageVO;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
+import cn.lili.modules.blindBox.entity.dto.search.PriceSearchParams;
 import cn.lili.modules.blindBox.entity.vo.BlindBoxPriceVO;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -26,7 +27,7 @@ public interface BlindBoxPriceService extends IService<Price> {
      * 分页查询价格
      * @return
      */
-    IPage<Price> queryPriceByPage(PageVO pageVO);
+    IPage<Price> queryPriceByPage(PriceSearchParams priceSearchParams);
 
     /**
      * 添加价格
@@ -38,7 +39,7 @@ public interface BlindBoxPriceService extends IService<Price> {
      * 更新价格
      * @param blindBoxPriceDTO
      */
-    void update(BlindBoxPriceDTO blindBoxPriceDTO);
+    boolean update(BlindBoxPriceDTO blindBoxPriceDTO);
 
     /**
      * 删除价格
@@ -50,7 +51,7 @@ public interface BlindBoxPriceService extends IService<Price> {
      * 删除价格
      * @param id
      */
-    void deleteById(String id );
+    boolean deleteById(String id );
 
     /**
      * ids
@@ -63,4 +64,19 @@ public interface BlindBoxPriceService extends IService<Price> {
      * @param ids
      */
     void batchDelete(List<String> ids);
+
+    /**
+     * 添加盲盒价格
+     * @param blindBoxPriceDTO
+     * @return
+     */
+    boolean add(BlindBoxPriceDTO blindBoxPriceDTO);
+
+    /**
+     * 禁用盲盒价格
+     * @param id
+     * @param disable
+     * @return
+     */
+    boolean blindBoxPriceDisable(String id, boolean disable);
 }

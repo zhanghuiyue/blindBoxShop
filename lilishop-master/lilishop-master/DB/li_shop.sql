@@ -11,6 +11,7 @@ CREATE TABLE `li_price` (
   `num` INT DEFAULT NULL COMMENT '数量',
   `name` VARCHAR(255) DEFAULT NULL COMMENT '价格名称',
   `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
+  `sort_order` INT DEFAULT NULL COMMENT '排序值',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 

@@ -1,10 +1,15 @@
 package cn.lili.modules.blindBox.serviceimpl;
 
+import cn.lili.common.enums.ResultCode;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
+import cn.lili.common.utils.StringUtils;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.blindBox.entity.dos.BlindBoxCategory;
 import cn.lili.modules.blindBox.entity.dos.Price;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxCouponDTO;
 import cn.lili.modules.blindBox.entity.dto.BlindBoxPriceDTO;
+import cn.lili.modules.blindBox.entity.dto.search.PriceSearchParams;
 import cn.lili.modules.blindBox.entity.vo.BlindBoxPriceVO;
 import cn.lili.modules.blindBox.mapper.PriceMapper;
 import cn.lili.modules.blindBox.service.BlindBoxPriceService;
@@ -89,9 +94,15 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
     }
 
     @Override
-    public IPage<Price> queryPriceByPage(PageVO pageVO) {
+    public IPage<Price> queryPriceByPage(PriceSearchParams priceSearchParams) {
         LambdaQueryWrapper<Price> queryWrapper = new LambdaQueryWrapper<>();
-        return this.page(PageUtil.initPage(pageVO),queryWrapper);
+        if(StringUtils.isNotBlank(priceSearchParams.getName())) {
+            queryWrapper.eq(Price::getName, priceSearchParams.getName());
+        }
+        if(StringUtils.isNotBlank(priceSearchParams.getBlindBoxId())) {
+            queryWrapper.eq(Price::getBlindBoxId, priceSearchParams.getBlindBoxId());
+        }
+        return this.page(PageUtil.initPage(priceSearchParams),queryWrapper);
     }
 
     @Override
@@ -106,10 +117,29 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
     }
 
     @Override
-    public void update(BlindBoxPriceDTO blindBoxPriceDTO) {
+    public boolean update(BlindBoxPriceDTO blindBoxPriceDTO) {
         Price price = new Price();
         BeanUtil.copyProperties(blindBoxPriceDTO,price);
-        this.baseMapper.updateById(price);
+        this.checkExist(blindBoxPriceDTO.getId());
+        if (getOne(new LambdaQueryWrapper<Price>().eq(Price::getName, blindBoxPriceDTO.getName()).ne(Price::getId, blindBoxPriceDTO.getId())) != null) {
+            throw new ServiceException(ResultCode.BLIND_BOX_PRICE_NAME_EXIST_ERROR);
+        }
+        return this.updateById(price);
+    }
+
+    /**
+     * 校验是否存在
+     *
+     * @param id 分类ID
+     * @return
+     */
+    private Price checkExist(String id) {
+        Price price = getById(id);
+        if (price == null) {
+            log.error("价格ID为" + id + "的价格不存在");
+            throw new ServiceException(ResultCode.BLIND_BOX_PRICE_NOT_EXIST);
+        }
+        return price;
     }
 
     @Override
@@ -120,8 +150,8 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
     }
 
     @Override
-    public void deleteById(String id) {
-        this.baseMapper.deleteById(id);
+    public boolean deleteById(String id) {
+        return this.removeById(id);
     }
 
     @Override
@@ -138,4 +168,21 @@ public class BlindBoxPriceServiceImpl extends ServiceImpl<PriceMapper, Price> im
     public void batchDelete(List<String> ids) {
         this.baseMapper.deleteBatchIds(ids);
     }
+
+    @Override
+    public boolean add(BlindBoxPriceDTO blindBoxPriceDTO) {
+        if (getOne(new LambdaQueryWrapper<Price>().eq(Price::getName, blindBoxPriceDTO.getName()).eq(Price::getBlindBoxId, blindBoxPriceDTO.getBlindBoxId())) != null) {
+            throw new ServiceException(ResultCode.BLIND_BOX_PRICE_NAME_EXIST_ERROR);
+        }
+        Price price = new Price();
+        BeanUtil.copyProperties(blindBoxPriceDTO,price);
+        return this.save(price);
+    }
+    @Override
+    public boolean blindBoxPriceDisable(String id, boolean disable) {
+        Price price = this.checkExist(id);
+        price.setDeleteFlag(disable);
+        return updateById(price);
+    }
+
 }

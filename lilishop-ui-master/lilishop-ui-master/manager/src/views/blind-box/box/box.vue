@@ -377,7 +377,7 @@ export default {
     },
     // 查询价格
     selectPrice(item) {
-      this.$router.push({ name: "select-price",query: item });
+      this.$router.push({ name: "select-price",query: {blindBoxId:item.id} });
     },
     // 获取数据
     getDataList() {

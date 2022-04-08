@@ -531,7 +531,17 @@ public enum ResultCode {
     BLIND_BOX_DELETE_ERROR(140003, "盲盒删除失败"),
     BLIND_BOX_NAME_EXIST_ERROR(140004, "盲盒名称重复！"),
     BLIND_BOX_USE_DISABLE_ERROR(140005, "盲盒已经绑定盲盒，请先解除关联"),
-    BLIND_BOX_NOT_EXIST(140006, "盲盒不存在");
+    BLIND_BOX_NOT_EXIST(140006, "盲盒不存在"),
+
+    /**
+     * 盲盒价格
+     */
+    BLIND_BOX_PRICE_SAVE_ERROR(140000, "盲盒价格添加失败"),
+    BLIND_BOX_PRICE_UPDATE_ERROR(140001, "盲盒价格修改失败"),
+    BLIND_BOX_PRICE_DISABLE_ERROR(140002, "盲盒价格禁用失败"),
+    BLIND_BOX_PRICE_DELETE_ERROR(140003, "盲盒价格删除失败"),
+    BLIND_BOX_PRICE_NAME_EXIST_ERROR(140004, "盲盒价格名称重复！"),
+    BLIND_BOX_PRICE_NOT_EXIST(140005, "盲盒价格不存在");
 
     private final Integer code;
     private final String message;

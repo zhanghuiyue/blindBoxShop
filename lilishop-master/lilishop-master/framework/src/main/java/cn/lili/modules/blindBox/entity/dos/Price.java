@@ -33,4 +33,7 @@ public class Price extends BaseEntity {
     @ApiModelProperty(value = "价格名称")
     private String name;
 
+    @ApiModelProperty(value = "排序值")
+    private String sortOrder;
+
 }
