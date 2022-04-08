@@ -10,12 +10,11 @@ CREATE TABLE `li_price` (
   `original_price` DOUBLE(10,2) DEFAULT NULL COMMENT '原价',
   `num` INT DEFAULT NULL COMMENT '数量',
   `name` VARCHAR(255) DEFAULT NULL COMMENT '价格名称',
-  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
 DROP TABLE li_prize
-
 CREATE TABLE `li_prize` (
   `id` BIGINT NOT NULL COMMENT 'ID',
   `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
@@ -28,7 +27,7 @@ CREATE TABLE `li_prize` (
   `substitution_flag` char(1) DEFAULT NULL COMMENT '置换标识，0表示未置换，1表示已置换',
   `substitution_num` INT DEFAULT NULL COMMENT '置换次数',
   `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
-	`blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+	`blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -44,9 +43,10 @@ CREATE TABLE `li_blind_box` (
   `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   `sort_order` INT DEFAULT NULL COMMENT '排序值',
-  `label` VARCHAR(255) DEFAULT NULL COMMENT '盲盒的标签',
+  `category_name` VARCHAR(255) DEFAULT NULL COMMENT '分类名称',
   `price` DOUBLE(10,2) DEFAULT NULL COMMENT '价格',
   `blind_box_type` VARCHAR(15) DEFAULT NULL COMMENT '盲盒类型，FREE免费，CHARGE收费',
+	`category_id` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -73,7 +73,7 @@ CREATE TABLE `li_blind_box_goods` (
   `quantity` INT DEFAULT NULL COMMENT '库存',
   `specs` VARCHAR(255)  DEFAULT NULL COMMENT '规格信息',
   `probability`DOUBLE(10,2) DEFAULT NULL COMMENT '中奖概率',
-  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
    PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
 
@@ -105,7 +105,7 @@ CREATE TABLE `li_blind_box_order` (
   `sn` VARCHAR(255) DEFAULT NULL COMMENT '订单编号',
   `receivable_no` VARCHAR(255) DEFAULT NULL COMMENT '第三方付款流水号',
   `name` VARCHAR(255) COMMENT '盲盒名称',
-  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
   `buy_way` VARCHAR(255) COMMENT '购买方式',
   `extract_status` VARCHAR(1) DEFAULT NULL COMMENT '抽取的状态，0表示未抽取，1表示已抽取',
   PRIMARY KEY (`id`)
@@ -166,6 +166,7 @@ CREATE TABLE `li_give_goods` (
   `give_goods_type` VARCHAR(255) DEFAULT NULL COMMENT '赠送商品类型，0表示奖品，1表示置换商品，2表示购买商品',
   `give_member_id` VARCHAR(255) DEFAULT NULL COMMENT '赠送人',
   `gived_member_id` VARCHAR(255) DEFAULT NULL COMMENT '被赠送人',
+  `warehouse_tribe_id` VARCHAR(255) DEFAULT NULL COMMENT '仓库id或者部落id',
   `exchange_status` VARCHAR(15) DEFAULT NULL COMMENT '兑换状态，UNEXCHANGE：未兑换，EXCHANGE:兑换',
 	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:未赠送，CANCELGIVE：取消赠送，AUTOUNGIVE：自动取消赠送，GIVEED已赠送',
 	`cancel_reason` VARCHAR(255) DEFAULT NULL COMMENT '取消赠送理由',
@@ -203,7 +204,7 @@ CREATE TABLE `li_warehouse` (
   `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
   `goods_id` VARCHAR(255) DEFAULT NULL COMMENT '商品编号',
   `sku_id` VARCHAR(255) DEFAULT NULL COMMENT '商品sku编号',
-  `goods_type` char(1) DEFAULT NULL COMMENT '商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示赠送商品',
+  `goods_type` char(1) DEFAULT NULL COMMENT '商品类型，0表示奖品，1表示置换商品，2表示购买商品,3表示盲盒',
   `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员编号',
   `exchange_status` VARCHAR(15) DEFAULT NULL COMMENT '兑换状态，UNEXCHANGE：未兑换，EXCHANGE:兑换',
 	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:取消赠送',
@@ -211,5 +212,19 @@ CREATE TABLE `li_warehouse` (
 	`substitution_status` VARCHAR(15) DEFAULT NULL COMMENT '置换状态，SUBSTITUTION：置换，UNSUBSTITUTION:未置换',
 	`substitution_flag` char(1) DEFAULT NULL COMMENT '置换标识，0：可以置换，1:不可以置换',
 	`receive_status` VARCHAR(15) DEFAULT NULL COMMENT '领取状态，RECEIVE：领取，UNRECEIVE:未领取',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8;
+
+drop table li_blind_box_category
+
+CREATE TABLE `li_blind_box_category` (
+  `id` BIGINT NOT NULL COMMENT 'ID',
+  `create_by` VARCHAR(255) DEFAULT NULL COMMENT '创建者',
+  `create_time` DATETIME(6) DEFAULT NULL COMMENT '创建时间',
+  `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
+  `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
+  `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
+  `sort_order` INT DEFAULT NULL COMMENT '排序值',
+  `category_name` VARCHAR(255) DEFAULT NULL COMMENT '分类名称',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;

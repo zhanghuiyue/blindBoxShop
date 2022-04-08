@@ -53,23 +53,31 @@ public interface BlindBoxService extends IService<BlindBox> {
      * 添加盲盒
      * @param blindBoxDTO
      */
-    void addBlindBox(BlindBoxDTO blindBoxDTO);
+    boolean addBlindBox(BlindBoxDTO blindBoxDTO);
 
     /**
      * 更新盲盒
      * @param blindBoxDTO
      */
-    void updateBlindBox(BlindBoxDTO blindBoxDTO);
+    boolean updateBlindBox(BlindBoxDTO blindBoxDTO);
 
     /**
      * 删除盲盒
      * @param id
      */
-    void deleteBlindBox(String id);
+    boolean deleteBlindBox(String id);
 
     /**
      * 批量删除盲盒
      * @param ids
      */
     void batchDeleteBlindBox(List<String> ids);
+
+    /**
+     * 禁用盲盒
+     * @param id
+     * @param disable
+     * @return
+     */
+    boolean blindBoxDisable(String id, boolean disable);
 }

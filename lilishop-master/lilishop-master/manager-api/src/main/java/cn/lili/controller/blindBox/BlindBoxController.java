@@ -1,6 +1,8 @@
 package cn.lili.controller.blindBox;
 
+import cn.lili.common.enums.ResultCode;
 import cn.lili.common.enums.ResultUtil;
+import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.BeanUtil;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.blindBox.entity.dos.BlindBox;
@@ -11,9 +13,11 @@ import cn.lili.modules.blindBox.service.BlindBoxService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,20 +57,26 @@ public class BlindBoxController {
 
     @ApiOperation(value = "添加盲盒")
     @PostMapping(value = "/add")
-    public ResultMessage add(@RequestBody BlindBoxDTO blindBoxDTO) {
-        blindBoxService.addBlindBox(blindBoxDTO);
-        return ResultUtil.success();
+    public ResultMessage<BlindBoxDTO> add(@Valid BlindBoxDTO blindBoxDTO) {
+        if(blindBoxService.addBlindBox(blindBoxDTO)){
+            return ResultUtil.data(blindBoxDTO);
+        }else {
+            throw new ServiceException(ResultCode.BLIND_BOX_SAVE_ERROR);
+        }
     }
 
     @ApiOperation(value = "更新盲盒")
-    @PutMapping(value = "/update")
-    public ResultMessage update (@RequestBody BlindBoxDTO blindBoxDTO) {
-        blindBoxService.updateBlindBox(blindBoxDTO);
-        return ResultUtil.success();
+    @PutMapping(value = "/update/{id}")
+    public ResultMessage<BlindBoxDTO> update (@PathVariable String id,@Valid BlindBoxDTO blindBoxDTO) {
+        blindBoxDTO.setId(id);
+        if (blindBoxService.updateBlindBox(blindBoxDTO)) {
+            return ResultUtil.data(blindBoxDTO);
+        }
+        throw new ServiceException(ResultCode.BLIND_BOX_UPDATE_ERROR);
     }
 
     @ApiOperation(value = "删除盲盒")
-    @PutMapping(value = "/delete/{id}")
+    @DeleteMapping(value = "/delete/{id}")
     public ResultMessage delete (@PathVariable String id) {
         blindBoxService.deleteBlindBox(id);
         return ResultUtil.success();
@@ -77,5 +87,13 @@ public class BlindBoxController {
     public ResultMessage batchDelete (@PathVariable List<String> ids) {
         blindBoxService.batchDeleteBlindBox(ids);
         return ResultUtil.success();
+    }
+
+    @PutMapping(value = "/disable/{id}")
+    public ResultMessage<Object> disable(@PathVariable String id, @RequestParam Boolean disable) {
+        if (blindBoxService.blindBoxDisable(id, disable)) {
+            return ResultUtil.success();
+        }
+        throw new ServiceException(ResultCode.BLIND_BOX_DISABLE_ERROR);
     }
 }

@@ -162,6 +162,13 @@ export const otherRouter = {
         import("@/views/promotions/points-goods/points-goods-add.vue")
     },
     {
+      path: "blind-box/box",
+      title: "查询价格",
+      name: "select-price",
+      component: () =>
+        import("@/views/blind-box/box/select-price.vue")
+    },
+    {
       path: "promotions/edit-points-goods",
       title: "修改积分商品",
       name: "edit-points-goods",
@@ -283,7 +290,12 @@ export const otherRouter = {
       name: "box-seckill-goods",
       component: () => import("@/views/blind-box/box-recommend/seckill/seckill-box.vue")
     },
-
+    {
+      path: "/blind-box/box-recommend/seckill/seckill-box",
+      title: "盲盒管理",
+      name: "box-seckill-goods",
+      component: () => import("@/views/blind-box/box-recommend/seckill/seckill-box.vue")
+    },
     {
       path: "live-detail",
       title: "查看直播",

@@ -17,5 +17,10 @@ public class BlindBoxCategory extends BaseEntity {
     @ApiModelProperty(value = "id")
     private String id;
 
+    @ApiModelProperty(value = "排序值")
+    private String sortOrder;
+
+    @ApiModelProperty(value = "盲盒的分类名称")
+    private String categoryName;
 
 }
