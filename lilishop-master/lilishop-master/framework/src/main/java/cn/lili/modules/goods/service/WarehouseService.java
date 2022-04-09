@@ -1,8 +1,9 @@
 package cn.lili.modules.goods.service;
 
-import cn.lili.modules.goods.entity.dos.BlindBoxGoods;
 import cn.lili.modules.goods.entity.dos.GiveGoods;
 import cn.lili.modules.goods.entity.dos.Warehouse;
+import cn.lili.modules.goods.entity.dto.WarehouseDTO;
+import cn.lili.modules.goods.entity.dto.search.WareHouseSearchParams;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -18,4 +19,22 @@ public interface WarehouseService extends IService<Warehouse> {
      * @return
      */
     Warehouse queryWarehouse(GiveGoods goods);
+
+
+
+    /**
+     * 仓库查询
+     *
+     * @param wareHouseSearchParams 查询参数
+     * @return 仓库分页
+     */
+    List<WarehouseDTO> queryByParams(WareHouseSearchParams wareHouseSearchParams);
+
+    /**
+     * 添加待置换商品订单
+     * @param id
+     * @param warehouseDTOs
+     */
+    void addReplaceOrder(String id ,List<WarehouseDTO> warehouseDTOs);
+
 }
