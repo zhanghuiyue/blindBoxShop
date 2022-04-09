@@ -1,6 +1,7 @@
 package cn.lili.modules.goods.entity.dos;
 
 import cn.lili.modules.goods.entity.enums.*;
+import cn.lili.modules.goods.entity.vos.ReplaceDetailVO;
 import cn.lili.mybatis.BaseEntity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -10,6 +11,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
+import java.util.List;
 
 @Data
 @TableName("li_replace_order")
@@ -35,6 +37,9 @@ public class ReplaceOrder extends BaseEntity {
     @ApiModelProperty(value = "实际支付金额", required = true)
     private Double actualAmount ;
 
+    @ApiModelProperty(value = "会员ID")
+    private String memberId;
+
     /**
      * 待付款 已完成 已取消
      */
@@ -48,6 +53,9 @@ public class ReplaceOrder extends BaseEntity {
 
     @ApiModelProperty(value = "sn")
     private String sn;
+
+    @ApiModelProperty(value = "置换订单详情")
+    private List<ReplaceDetailVO> replaceDetailList;
 
     public ReplaceOrder() {
     }

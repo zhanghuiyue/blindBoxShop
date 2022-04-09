@@ -1,6 +1,7 @@
 package cn.lili.modules.goods.service;
 
 import cn.lili.modules.goods.entity.dos.GiveGoods;
+import cn.lili.modules.goods.entity.dos.ReplaceOrder;
 import cn.lili.modules.goods.entity.dos.Warehouse;
 import cn.lili.modules.goods.entity.dto.WarehouseDTO;
 import cn.lili.modules.goods.entity.dto.search.WareHouseSearchParams;
@@ -26,7 +27,7 @@ public interface WarehouseService extends IService<Warehouse> {
      * 仓库查询
      *
      * @param wareHouseSearchParams 查询参数
-     * @return 仓库分页
+     * @return 仓库列表
      */
     List<WarehouseDTO> queryByParams(WareHouseSearchParams wareHouseSearchParams);
 
@@ -36,5 +37,14 @@ public interface WarehouseService extends IService<Warehouse> {
      * @param warehouseDTOs
      */
     void addReplaceOrder(String id ,List<WarehouseDTO> warehouseDTOs);
+
+
+    /**
+     * 置换记录查询
+     *
+     * @return 置换列表
+     */
+    List<ReplaceOrder> getReplaceOrderList();
+
 
 }

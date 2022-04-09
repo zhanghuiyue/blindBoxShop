@@ -1,7 +1,10 @@
 package cn.lili.modules.goods.serviceimpl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
+import cn.lili.common.security.AuthUser;
+import cn.lili.common.security.context.UserContext;
 import cn.lili.common.utils.SnowFlake;
 import cn.lili.common.utils.StringUtils;
 import cn.lili.modules.blindBox.entity.dos.BoxGoods;
@@ -10,15 +13,14 @@ import cn.lili.modules.goods.entity.dos.*;
 import cn.lili.modules.goods.entity.dto.WarehouseDTO;
 import cn.lili.modules.goods.entity.dto.search.WareHouseSearchParams;
 import cn.lili.modules.goods.entity.enums.GiveStatusEnum;
+import cn.lili.modules.goods.entity.vos.ReplaceDetailVO;
 import cn.lili.modules.goods.mapper.WarehouseMapper;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.goods.service.ReplaceDetailService;
 import cn.lili.modules.goods.service.ReplaceOrderService;
 import cn.lili.modules.goods.service.WarehouseService;
-import cn.lili.modules.payment.kit.plugin.wechat.model.GoodsDetail;
-import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 盲盒仓库业务层实现
@@ -84,8 +87,6 @@ public class WarehouseServiceImpl extends ServiceImpl<WarehouseMapper, Warehouse
             WarehouseDTO warehouseDTO = new WarehouseDTO(wareHouse);
             String  goods_id = wareHouse.getGoodsId();
             String sku_id = wareHouse.getSkuId();
-            System.out.println("22商品信息："+wareHouse.getId());
-            System.out.println("商品信息："+goods_id +"2323Sku_id："+sku_id);
             if(null != goods_id &&!goods_id.equals("") ){
                 BoxGoods  boxGoods =boxGoodsService.getById(goods_id);
                 if(null != boxGoods) {
@@ -169,5 +170,48 @@ public class WarehouseServiceImpl extends ServiceImpl<WarehouseMapper, Warehouse
         return goodsSku;
     }
 
+    /**
+     * 用户置换记录
+     * @return
+     */
+    public List<ReplaceOrder> getReplaceOrderList(){
 
+        List<ReplaceOrder>  replaceOrderDTOList = new ArrayList<ReplaceOrder>();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+
+        QueryWrapper<ReplaceOrder> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("member_id", currentUser.getId());
+        List<ReplaceOrder>  replaceOrders =this.replaceOrderService.list(queryWrapper);
+        for (ReplaceOrder replaceOrder : replaceOrders) {
+            QueryWrapper<ReplaceDetail> queryWrapperDetail = new QueryWrapper<>();
+            queryWrapperDetail.eq("sn", replaceOrder.getSn());
+            List<ReplaceDetail>  replaceDetailList = this.replaceDetailService.list(queryWrapperDetail);
+            List<ReplaceDetailVO>  replaceDetailVOList =new ArrayList<ReplaceDetailVO>();
+            for (ReplaceDetail replaceDetail : replaceDetailList) {
+                String  goods_id = replaceDetail.getGoodsId();
+                String sku_id = replaceDetail.getSkuId();
+                ReplaceDetailVO  replaceDetailVO =new ReplaceDetailVO();
+                BeanUtil.copyProperties(replaceDetail, replaceDetailVO);
+                if(null != goods_id &&!goods_id.equals("") ){
+                    BoxGoods  boxGoods =boxGoodsService.getById(goods_id);
+                    if(null != boxGoods) {
+                        replaceDetailVO.setPrice(boxGoods.getPrice());
+                        replaceDetailVO.setGoodsName(boxGoods.getGoodsName());
+                        replaceDetailVO.setSmall(boxGoods.getSmall());
+                    }
+                }else if(null != sku_id &&!sku_id.equals("") ){
+                    GoodsSku goodsSku =  goodsSkuService.getById(sku_id);
+                    if(null != goodsSku) {
+                        replaceDetailVO.setPrice(goodsSku.getPrice());
+                        replaceDetailVO.setGoodsName(goodsSku.getGoodsName());
+                        replaceDetailVO.setSmall(goodsSku.getSmall());
+                    }
+
+                }
+                replaceDetailVOList.add(replaceDetailVO);
+            }
+            replaceOrder.setReplaceDetailList(replaceDetailVOList);
+        }
+        return replaceOrderDTOList;
+    }
 }
