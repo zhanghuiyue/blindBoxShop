@@ -214,4 +214,46 @@ public class WarehouseServiceImpl extends ServiceImpl<WarehouseMapper, Warehouse
         }
         return replaceOrderDTOList;
     }
+
+    public ReplaceOrder getReplaceOrder(String sn){
+
+        QueryWrapper<ReplaceOrder> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("sn", sn);
+        ReplaceOrder replaceOrder =this.replaceOrderService.getOne(queryWrapper);
+        List<ReplaceOrder>  replaceOrderDTOList = new ArrayList<ReplaceOrder>();
+        AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+
+        QueryWrapper<ReplaceDetail> queryWrapperDetail = new QueryWrapper<>();
+        queryWrapperDetail.eq("sn", sn);
+        List<ReplaceDetail>  replaceDetailList = this.replaceDetailService.list(queryWrapperDetail);
+        List<ReplaceDetailVO>  replaceDetailVOList =new ArrayList<ReplaceDetailVO>();
+        for (ReplaceDetail replaceDetail : replaceDetailList) {
+            String  goods_id = replaceDetail.getGoodsId();
+            String sku_id = replaceDetail.getSkuId();
+            ReplaceDetailVO  replaceDetailVO =new ReplaceDetailVO();
+            BeanUtil.copyProperties(replaceDetail, replaceDetailVO);
+            if(null != goods_id &&!goods_id.equals("") ){
+                BoxGoods  boxGoods =boxGoodsService.getById(goods_id);
+                if(null != boxGoods) {
+                    replaceDetailVO.setPrice(boxGoods.getPrice());
+                    replaceDetailVO.setGoodsName(boxGoods.getGoodsName());
+                    replaceDetailVO.setSmall(boxGoods.getSmall());
+                }
+            }else if(null != sku_id &&!sku_id.equals("") ){
+                GoodsSku goodsSku =  goodsSkuService.getById(sku_id);
+                if(null != goodsSku) {
+                    replaceDetailVO.setPrice(goodsSku.getPrice());
+                    replaceDetailVO.setGoodsName(goodsSku.getGoodsName());
+                    replaceDetailVO.setSmall(goodsSku.getSmall());
+                }
+
+            }
+                replaceDetailVOList.add(replaceDetailVO);
+            }
+        replaceOrder.setReplaceDetailList(replaceDetailVOList);
+
+        return replaceOrder;
+    }
+
+
 }

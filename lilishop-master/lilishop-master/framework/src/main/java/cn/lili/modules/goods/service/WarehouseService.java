@@ -46,5 +46,12 @@ public interface WarehouseService extends IService<Warehouse> {
      */
     List<ReplaceOrder> getReplaceOrderList();
 
+    /**
+     * 查询订单详情
+     * @param sn
+     * @return
+     */
+    ReplaceOrder getReplaceOrder(String sn) ;
+
 
 }
