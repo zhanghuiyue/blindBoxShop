@@ -38,8 +38,7 @@ public class MemberAddressBuyerController {
     @ApiOperation(value = "获取会员收件地址分页列表")
     @GetMapping
     public ResultMessage<IPage<MemberAddress>> page(PageVO page) {
-        //return ResultUtil.data(memberAddressService.getAddressByMember(page, UserContext.getCurrentUser().getId()));
-        return null;
+        return ResultUtil.data(memberAddressService.getAddressByMember(page, UserContext.getCurrentUser().getId()));
     }
 
     @ApiOperation(value = "根据ID获取会员收件地址")

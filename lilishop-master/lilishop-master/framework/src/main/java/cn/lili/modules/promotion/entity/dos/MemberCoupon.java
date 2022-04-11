@@ -113,6 +113,9 @@ public class MemberCoupon extends BaseEntity{
     @ApiModelProperty(value = "会员优惠券状态")
     private String memberCouponStatus;
 
+    @ApiModelProperty(value = "商品类型，0普通商品，盲盒商品")
+    private String goodsType;
+
     public MemberCoupon() {
     }
 
@@ -127,7 +130,9 @@ public class MemberCoupon extends BaseEntity{
         setScopeId(coupon.getScopeId());
         setCouponType(coupon.getCouponType());
         setStartTime(coupon.getStartTime() == null ? new Date() : coupon.getStartTime());
-
+        setName(coupon.getName());
+        setCouponName(coupon.getCouponName());
+        setGoodsType(coupon.getGoodsType());
         setGetType(coupon.getGetType());
         setStoreCommission(coupon.getStoreCommission());
         if (coupon.getRangeDayType().equals(CouponRangeDayEnum.FIXEDTIME.name())) {

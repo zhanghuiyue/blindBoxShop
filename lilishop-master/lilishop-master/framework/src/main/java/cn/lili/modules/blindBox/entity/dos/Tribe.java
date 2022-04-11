@@ -42,6 +42,6 @@ public class Tribe extends BaseEntity {
     private String status;
 
     @ApiModelProperty(value = "种类id")
-    private String blindBoxCategory;
+    private String blindBoxId;
 
 }

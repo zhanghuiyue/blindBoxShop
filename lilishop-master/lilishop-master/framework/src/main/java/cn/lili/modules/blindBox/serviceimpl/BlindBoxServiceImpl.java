@@ -133,20 +133,19 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxMapper, BlindBox> i
         List<BlindBoxGoods> blindBoxGoods = null;
         if(BlindBoxTypeEnum.CHARGE.name().equals(tribe.getBlindBoxType())) {
             //取出类型id，查询出商品列表
-            blindBoxGoods = blindBoxGoodsService.queryList(tribe.getBlindBoxCategory());
+            blindBoxGoods = blindBoxGoodsService.queryList(tribe.getBlindBoxId());
             //抽奖
             List<BlindBoxGoodsDTO> boxGoods = extract(blindBoxGoods,tribe.getNum());
             //记录奖品
             LambdaQueryWrapper<BlindBox> queryWrapper = new LambdaQueryWrapper<>();
-            if (StringUtils.isNotBlank(tribe.getBlindBoxCategory())) {
-                queryWrapper.eq(BlindBox::getId, tribe.getBlindBoxCategory());
+            if (StringUtils.isNotBlank(tribe.getBlindBoxId())) {
+                queryWrapper.eq(BlindBox::getId, tribe.getBlindBoxId());
             }
             BlindBox blindBox = this.baseMapper.selectOne(queryWrapper);
             blindBoxPrizeService.batchAddPrize(bulidPrizeList(boxGoods, blindBox,currentUser.getId()));
             blindBoxGoodsVO.setBlindBoxGoodsDTOS(boxGoods);
         }else if(BlindBoxTypeEnum.FREE.name().equals(tribe.getBlindBoxType())){
             LambdaQueryWrapper<Coupon> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Coupon::getPromotionStatus, PromotionsStatusEnum.START.name());
             List<Coupon> couponList = couponService.getBaseMapper().selectList(queryWrapper);
             List<Coupon> filterCoupons = filterCoupon(couponList,extractParam.getId());
             List<BlindBoxCouponDTO> blindBoxCouponDTOS = extractCoupon(filterCoupons,tribe.getNum());
@@ -155,7 +154,9 @@ public class BlindBoxServiceImpl extends ServiceImpl<BlindBoxMapper, BlindBox> i
             for (BlindBoxCouponDTO blindBoxCouponDTO:blindBoxCouponDTOS) {
                 CouponSearchParams searchParams = new CouponSearchParams();
                 searchParams.setId(blindBoxCouponDTO.getCouponId());
+                couponSearchParams.add(searchParams);
             }
+            blindBoxGoodsVO.setBlindBoxCouponDTOS(blindBoxCouponDTOS);
             memberCouponService.receiveBuyerCouponList(couponSearchParams);
         }
         //修改抽取的状态

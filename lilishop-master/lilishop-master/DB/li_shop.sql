@@ -73,7 +73,7 @@ CREATE TABLE `li_blind_box_goods` (
   `big` VARCHAR(255)  DEFAULT NULL COMMENT '大图路径',
   `quantity` INT DEFAULT NULL COMMENT '库存',
   `specs` VARCHAR(255)  DEFAULT NULL COMMENT '规格信息',
-  `probability`DOUBLE(10,2) DEFAULT NULL COMMENT '中奖概率',
+  `probability`DOUBLE(12,12) DEFAULT NULL COMMENT '中奖概率',
   `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
    PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;
@@ -106,7 +106,7 @@ CREATE TABLE `li_blind_box_order` (
   `sn` VARCHAR(255) DEFAULT NULL COMMENT '订单编号',
   `receivable_no` VARCHAR(255) DEFAULT NULL COMMENT '第三方付款流水号',
   `name` VARCHAR(255) COMMENT '盲盒名称',
-  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
+  `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
   `buy_way` VARCHAR(255) COMMENT '购买方式',
   `extract_status` VARCHAR(1) DEFAULT NULL COMMENT '抽取的状态，0表示未抽取，1表示已抽取',
   PRIMARY KEY (`id`)
@@ -183,14 +183,14 @@ CREATE TABLE `li_tribe` (
   `delete_flag` BIT(1) DEFAULT NULL COMMENT '删除标志 true/false 删除/未删除',
   `update_by` VARCHAR(255) DEFAULT NULL COMMENT '更新者',
   `update_time` DATETIME(6) DEFAULT NULL COMMENT '更新时间',
-  `blind_box_category` VARCHAR(255) DEFAULT NULL COMMENT '种类id',
+  `blind_box_id` VARCHAR(255) DEFAULT NULL COMMENT '盲盒id',
   `num` INT DEFAULT NULL COMMENT '数量',
   `image` VARCHAR(255) DEFAULT NULL COMMENT '分类图标',
   `name` VARCHAR(20) DEFAULT NULL COMMENT '分类名称',
   `blind_box_type` VARCHAR(15) DEFAULT NULL COMMENT '盲盒类型，FREE免费，CHARGE收费',
   `member_id` VARCHAR(255) DEFAULT NULL COMMENT '会员编号',
 	`give_status` VARCHAR(15) DEFAULT NULL COMMENT '赠送状态，GIVE：赠送，UNGIVE:未赠送，CANCELGIVE：取消赠送，AUTOUNGIVE：自动取消赠送，GIVEED已赠送',
-	`extract_status` VARCHAR(1) DEFAULT NULL COMMENT '抽取的状态，0表示未抽取，1表示已抽取',
+	`extract_status` VARCHAR(15) DEFAULT NULL COMMENT '抽取的状态，UNEXTRACT表示未抽取，EXTRACT表示已抽取',
 	`status` VARCHAR(15) DEFAULT NULL COMMENT '盲盒的状态，VALID表示有效状态，UNVALID表示无效状态',
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8;

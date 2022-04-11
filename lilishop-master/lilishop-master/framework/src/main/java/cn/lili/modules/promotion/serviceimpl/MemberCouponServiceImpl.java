@@ -138,7 +138,10 @@ public class MemberCouponServiceImpl extends ServiceImpl<MemberCouponMapper, Mem
         for (CouponSearchParams searchParams:couponSearchParams) {
             ids.add(searchParams.getId());
         }
-        List<Coupon> couponList = couponService.getBaseMapper().selectBatchIds(ids);
+        List<Coupon> couponList = null;
+        if(CollectionUtils.isNotEmpty(ids)){
+            couponList = couponService.getBaseMapper().selectBatchIds(ids);
+        }
         if(CollectionUtils.isNotEmpty(couponList)){
             receiverCouponList(currentUser.getId(),currentUser.getUsername(),couponList);
         }else {

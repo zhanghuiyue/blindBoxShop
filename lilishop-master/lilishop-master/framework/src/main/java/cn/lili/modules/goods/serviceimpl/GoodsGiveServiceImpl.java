@@ -80,7 +80,7 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
             warehouseService.update(updateWrapper);
         }else {
             LambdaUpdateWrapper<Tribe> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Tribe::getBlindBoxCategory, giveGoodsDTO.getGiveGoodsId());
+            updateWrapper.eq(Tribe::getBlindBoxId, giveGoodsDTO.getGiveGoodsId());
             updateWrapper.eq(Tribe::getMemberId, currentUser.getId());
             updateWrapper.eq(Tribe::getBlindBoxType, giveGoodsDTO.getBlindBoxType());
             updateWrapper.set(Tribe::getGiveStatus, GiveStatusEnum.GIVE.name());
@@ -191,7 +191,7 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
             Tribe tribe = new Tribe();
             tribe.setGiveStatus(GiveStatusEnum.UNGIVE.name());
             tribe.setExtractStatus(ExchangeStatusEnum.UNEXCHANGE.name());
-            tribe.setBlindBoxCategory(goods.getGiveGoodsId());
+            tribe.setBlindBoxId(goods.getGiveGoodsId());
             BlindBox blindBox =  blindBoxService.getById(goods.getGiveGoodsId());
             BeanUtil.copyProperties(blindBox,tribe);
             tribeService.getBaseMapper().insert(tribe);
