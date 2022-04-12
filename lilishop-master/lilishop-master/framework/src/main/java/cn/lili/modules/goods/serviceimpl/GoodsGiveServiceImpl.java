@@ -55,10 +55,39 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
     @Transactional
     public String give(GiveGoodsDTO giveGoodsDTO) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
+        if(!"3".equals(giveGoodsDTO.getGiveGoodsType())) {
+            Warehouse warehouse = warehouseService.getBaseMapper().selectById(giveGoodsDTO.getId());
+            if(GiveStatusEnum.GIVE.name().equals(warehouse.getGiveStatus())|| GiveStatusEnum.GIVEED.name().equals(warehouse.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_GIVED_ERROR);
+            }
+            warehouse.setGiveStatus(GiveStatusEnum.GIVE.name());
+            warehouseService.updateById(warehouse);
+        }else {
+            Tribe tribe = tribeService.getBaseMapper().selectById(giveGoodsDTO.getId());
+            if(GiveStatusEnum.GIVE.name().equals(tribe.getGiveStatus())|| GiveStatusEnum.GIVEED.name().equals(tribe.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_GIVED_ERROR);
+            }
+            tribe.setGiveStatus(GiveStatusEnum.GIVE.name());
+            tribeService.updateById(tribe);
+        }
+        LambdaQueryWrapper<GiveGoods> giveGoodsQueryWrapper = new LambdaQueryWrapper<>();
+        giveGoodsQueryWrapper.eq(GiveGoods::getGiveMemberId,currentUser.getId());
+        giveGoodsQueryWrapper.eq(GiveGoods::getWarehouseTribeId,giveGoodsDTO.getId());
+        giveGoodsQueryWrapper.eq(GiveGoods::getGiveGoodsId,giveGoodsDTO.getGiveGoodsId());
+        if(StringUtils.isNotBlank(giveGoodsDTO.getGiveSkuId())){
+            giveGoodsQueryWrapper.eq(GiveGoods::getGiveSkuId,giveGoodsDTO.getGiveSkuId());
+        }
+        giveGoodsQueryWrapper.eq(GiveGoods::getGiveGoodsType,giveGoodsDTO.getGiveGoodsType());
+        GiveGoods goods = this.baseMapper.selectOne(giveGoodsQueryWrapper);
+        if(goods!=null){
+            throw new ServiceException(ResultCode.GOODS_GIVED_ERROR);
+        }
         GiveGoods giveGoods = new GiveGoods();
         String giveCode = "PR"+UUID.randomUUID().toString();
         giveGoods.setGiveCode(giveCode);
-        BeanUtil.copyProperties(giveGoodsDTO,giveGoods);
+        giveGoods.setGiveGoodsType(giveGoodsDTO.getGiveGoodsType());
+        giveGoods.setGiveGoodsId(giveGoodsDTO.getGiveGoodsId());
+        giveGoods.setGiveSkuId(giveGoodsDTO.getGiveSkuId());
         giveGoods.setExchangeStatus(ExchangeStatusEnum.UNEXCHANGE.name());
         giveGoods.setGiveStatus(GiveStatusEnum.GIVE.name());
         giveGoods.setStartTime(new Date());
@@ -67,26 +96,8 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         this.save(giveGoods);
         LambdaQueryWrapper<GiveGoods> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(GiveGoods::getGiveCode,giveCode);
-        GiveGoods goods = this.baseMapper.selectOne(queryWrapper);
-        if(!"3".equals(giveGoodsDTO.getGiveGoodsType())) {
-            LambdaUpdateWrapper<Warehouse> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Warehouse::getGoodsId, giveGoodsDTO.getGiveGoodsId());
-            if (StringUtils.isNotBlank(goods.getGiveSkuId())) {
-                updateWrapper.eq(Warehouse::getSkuId, giveGoodsDTO.getGiveSkuId());
-            }
-            updateWrapper.eq(Warehouse::getMemberId, currentUser.getId());
-            updateWrapper.eq(Warehouse::getGoodsType, giveGoodsDTO.getGiveGoodsType());
-            updateWrapper.set(Warehouse::getGiveStatus, GiveStatusEnum.GIVE.name());
-            warehouseService.update(updateWrapper);
-        }else {
-            LambdaUpdateWrapper<Tribe> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Tribe::getBlindBoxId, giveGoodsDTO.getGiveGoodsId());
-            updateWrapper.eq(Tribe::getMemberId, currentUser.getId());
-            updateWrapper.eq(Tribe::getBlindBoxType, giveGoodsDTO.getBlindBoxType());
-            updateWrapper.set(Tribe::getGiveStatus, GiveStatusEnum.GIVE.name());
-            tribeService.update(updateWrapper);
-        }
-        return goods.getId();
+        GiveGoods giveGood = this.baseMapper.selectOne(queryWrapper);
+        return giveGood.getId();
     }
 
     @Override
@@ -94,27 +105,31 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
     public void cancel(GiveGoodsDTO giveGoodsDTO) {
         AuthUser currentUser = Objects.requireNonNull(UserContext.getCurrentUser());
         LambdaQueryWrapper<GiveGoods> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(GiveGoods::getWarehouseTribeId,giveGoodsDTO.getId());
         queryWrapper.eq(GiveGoods::getGiveMemberId,currentUser.getId());
         queryWrapper.eq(GiveGoods::getGiveGoodsId,giveGoodsDTO.getGiveGoodsId());
         if(StringUtils.isNotBlank(giveGoodsDTO.getGiveSkuId())){
             queryWrapper.eq(GiveGoods::getGiveSkuId,giveGoodsDTO.getGiveSkuId());
         }
         queryWrapper.eq(GiveGoods::getGiveGoodsType,giveGoodsDTO.getGiveGoodsType());
-        queryWrapper.eq(GiveGoods::getGiveStatus, GiveStatusEnum.GIVE.name());
         GiveGoods giveGoods = this.baseMapper.selectOne(queryWrapper);
-        if(giveGoods == null){
-            throw new ServiceException(ResultCode.GOODS_NOT_EXIT_ERROR);
+        if(giveGoods == null || !GiveStatusEnum.GIVE.name().equals(giveGoods.getGiveStatus())){
+            throw new ServiceException(ResultCode.GOODS_NOT_CANCEL_ERROR);
         }
         giveGoods.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
         this.baseMapper.updateById(giveGoods);
         if(!"3".equals(giveGoodsDTO.getGiveGoodsType())) {
-            Warehouse updateWarehouse = new Warehouse();
-            updateWarehouse.setId(giveGoodsDTO.getId());
+            Warehouse updateWarehouse = warehouseService.getBaseMapper().selectById(giveGoodsDTO.getId());
+            if(updateWarehouse != null && !GiveStatusEnum.GIVE.name().equals(updateWarehouse.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_NOT_CANCEL_ERROR);
+            }
             updateWarehouse.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
             warehouseService.getBaseMapper().updateById(updateWarehouse);
         }else {
-            Tribe tribe = new Tribe();
-            tribe.setId(giveGoodsDTO.getId());
+            Tribe tribe = tribeService.getBaseMapper().selectById(giveGoodsDTO.getId());
+            if(tribe != null && !GiveStatusEnum.GIVE.name().equals(tribe.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_NOT_CANCEL_ERROR);
+            }
             tribe.setGiveStatus(GiveStatusEnum.CANCELGIVE.name());
             tribeService.getBaseMapper().updateById(tribe);
         }
@@ -133,17 +148,25 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         //0表示奖品
         if("0".equals(goods.getGiveGoodsType())){
             BlindBoxGoods blindBoxGoods = blindBoxGoodsService.getById(goods.getGiveGoodsId());
-            BeanUtil.copyProperties(blindBoxGoods,giveGoodsVO);
+            if(blindBoxGoods!=null) {
+                BeanUtil.copyProperties(blindBoxGoods, giveGoodsVO);
+            }
         }else if("3".equals(goods.getGiveGoodsType())){
             BlindBox blindBox =  blindBoxService.getById(goods.getGiveGoodsId());
-            giveGoodsVO.setGoodsName(blindBox.getName());
-            giveGoodsVO.setSmall(blindBox.getImage());
+            if(blindBox!=null) {
+                giveGoodsVO.setGoodsName(blindBox.getName());
+                giveGoodsVO.setSmall(blindBox.getImage());
+            }
         }else {
             Goods good =  goodsService.getById(goods.getGiveGoodsId());
-            giveGoodsVO.setSmall(good.getSmall());
+            if(good!=null) {
+                giveGoodsVO.setSmall(good.getSmall());
+            }
             GoodsSku goodsSku = goodsSkuService.getById(goods.getGiveSkuId());
-            giveGoodsVO.setGoodsName(goodsSku.getGoodsName());
-            giveGoodsVO.setSpecs(goodsSku.getSimpleSpecs());
+            if(goodsSku!=null) {
+                giveGoodsVO.setGoodsName(goodsSku.getGoodsName());
+                giveGoodsVO.setSpecs(goodsSku.getSimpleSpecs());
+            }
         }
         return giveGoodsVO;
     }
@@ -173,8 +196,10 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
         goods.setGivedMemberId(currentUser.getId());
         this.baseMapper.updateById(goods);
         if(!"3".equals(goods.getGiveGoodsType())) {
-            Warehouse updateWarehouse = new Warehouse();
-            updateWarehouse.setId(goods.getWarehouseTribeId());
+            Warehouse updateWarehouse = warehouseService.getBaseMapper().selectById(goods.getWarehouseTribeId());
+            if(!GiveStatusEnum.GIVE.name().equals(updateWarehouse.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_EXCHANGE_ERROR);
+            }
             updateWarehouse.setGiveStatus(GiveStatusEnum.GIVEED.name());
             warehouseService.getBaseMapper().updateById(updateWarehouse);
             Warehouse insertWarehouse = new Warehouse(currentUser.getId());
@@ -182,10 +207,14 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
             insertWarehouse.setGoodsType(goods.getGiveGoodsType());
             insertWarehouse.setGoodsId(goods.getGiveGoodsId());
             insertWarehouse.setSkuId(goods.getGiveSkuId());
+            insertWarehouse.setExchangeFlag("0");
+            insertWarehouse.setPickUpGoodsFlag("0");
             warehouseService.getBaseMapper().insert(insertWarehouse);
         }else {
-            Tribe updateTribe = new Tribe();
-            updateTribe.setId(goods.getWarehouseTribeId());
+            Tribe updateTribe = tribeService.getBaseMapper().selectById(goods.getWarehouseTribeId());
+            if(!GiveStatusEnum.GIVE.name().equals(updateTribe.getGiveStatus())){
+                throw new ServiceException(ResultCode.GOODS_EXCHANGE_ERROR);
+            }
             updateTribe.setGiveStatus(GiveStatusEnum.GIVEED.name());
             tribeService.getBaseMapper().updateById(updateTribe);
             Tribe tribe = new Tribe();
@@ -193,7 +222,9 @@ public class GoodsGiveServiceImpl extends ServiceImpl<GiveGoodsMapper, GiveGoods
             tribe.setExtractStatus(ExchangeStatusEnum.UNEXCHANGE.name());
             tribe.setBlindBoxId(goods.getGiveGoodsId());
             BlindBox blindBox =  blindBoxService.getById(goods.getGiveGoodsId());
+            blindBox.setId("");
             BeanUtil.copyProperties(blindBox,tribe);
+            tribe.setMemberId(currentUser.getId());
             tribeService.getBaseMapper().insert(tribe);
         }
     }

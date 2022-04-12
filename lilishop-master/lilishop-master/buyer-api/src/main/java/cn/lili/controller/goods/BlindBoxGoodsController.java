@@ -29,8 +29,15 @@ public class BlindBoxGoodsController {
     @ApiOperation(value = "获取商品详情")
     @ApiImplicitParam(name = "goodsId", value = "商品编号", required = true, dataType = "String", paramType = "path")
     @GetMapping(value = "/detail")
-    public ResultMessage<BlindBoxGoods> list(@NotNull(message = "商品编号不能为空") @RequestParam String goodsId) {
+    public ResultMessage<BlindBoxGoods> queryGoodsDetail(@NotNull(message = "商品编号不能为空") @RequestParam String goodsId) {
         return ResultUtil.data(blindBoxGoodsService.queryProductDetails(goodsId));
+    }
+
+    @ApiOperation(value = "获取商品列表")
+    @ApiImplicitParam(name = "blindBoxId", value = "商品编号", required = true, dataType = "String", paramType = "path")
+    @GetMapping(value = "/list")
+    public ResultMessage<List<BlindBoxGoods>> list(@NotNull(message = "盲盒编号不能为空") @RequestParam String blindBoxId) {
+        return ResultUtil.data(blindBoxGoodsService.queryList(blindBoxId));
     }
 
 

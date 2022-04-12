@@ -5,6 +5,7 @@ import cn.lili.common.security.AuthUser;
 import cn.lili.common.security.context.UserContext;
 import cn.lili.common.vo.ResultMessage;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.SubstitutionOrderDTO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.SubstitutionOrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.SubstitutionOrderSimpleVO;
@@ -27,7 +28,7 @@ public class SubstitutionOrderController {
 
     @ApiOperation(value = "查询置换商品订单列表及详情")
     @PostMapping("/substitution/order/query")
-    public ResultMessage<SubstitutionOrderSimpleVO> querySubstitutionOrder(@RequestBody SubstitutionOrderSearchParams substitutionOrderSearchParams) {
+    public ResultMessage<IPage<SubstitutionOrderDTO>> querySubstitutionOrder(@RequestBody SubstitutionOrderSearchParams substitutionOrderSearchParams) {
         return ResultUtil.data(substitutionOrderService.querySubstitutionOrder(substitutionOrderSearchParams));
     }
 }

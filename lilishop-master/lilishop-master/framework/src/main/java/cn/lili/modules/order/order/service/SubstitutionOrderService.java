@@ -3,6 +3,7 @@ package cn.lili.modules.order.order.service;
 import cn.lili.modules.order.order.entity.dos.Order;
 import cn.lili.modules.order.order.entity.dos.SubstitutionOrder;
 import cn.lili.modules.order.order.entity.dto.OrderSearchParams;
+import cn.lili.modules.order.order.entity.dto.SubstitutionOrderDTO;
 import cn.lili.modules.order.order.entity.vo.OrderSimpleVO;
 import cn.lili.modules.order.order.entity.vo.SubstitutionOrderSearchParams;
 import cn.lili.modules.order.order.entity.vo.SubstitutionOrderSimpleVO;
@@ -17,5 +18,5 @@ public interface SubstitutionOrderService extends IService<SubstitutionOrder> {
      * @param substitutionOrderSearchParams 订单状态
      * @return
      */
-    SubstitutionOrderSimpleVO querySubstitutionOrder(SubstitutionOrderSearchParams substitutionOrderSearchParams);
+    IPage<SubstitutionOrderDTO> querySubstitutionOrder(SubstitutionOrderSearchParams substitutionOrderSearchParams);
 }

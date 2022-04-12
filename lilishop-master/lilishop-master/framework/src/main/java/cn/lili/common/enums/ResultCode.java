@@ -508,7 +508,8 @@ public enum ResultCode {
      */
     GOODS_EXCHANGE_ERROR(120000,"赠送商品已领取或者已超时"),
     GOODS_EXCHANGE_MEMBER_ERROR(120001,"自己不能领取商品"),
-    GOODS_NOT_EXIT_ERROR(120002,"赠送商品不存在"),
+    GOODS_NOT_CANCEL_ERROR(120002,"赠送商品不能取消"),
+    GOODS_GIVED_ERROR(120003,"赠送商品已赠送"),
 
     /**
      * 盲盒类型
