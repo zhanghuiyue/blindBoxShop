@@ -63,6 +63,17 @@
               </Select>
             </FormItem>
 
+            <FormItem label="盲盒" prop="blindBoxId">
+                 <Select v-model="form.blindBoxId" style="width: 200px">
+                         <Option
+                           v-for="item in boxList"
+                           :value="item.id"
+                           :key="item.id"
+                           >{{ item.name }}
+                         </Option>
+                 </Select>
+            </FormItem>
+
             <FormItem label="店铺承担比例" prop="storeCommission">
               <Input
                 :disabled="disabled"
@@ -158,8 +169,8 @@
                 <Radio :disabled="disabled" label="ALL">全品类</Radio>
                 <Radio :disabled="disabled" label="PORTION_GOODS">指定商品</Radio>
                 <Radio :disabled="disabled" label="PORTION_GOODS_CATEGORY"
-                  >部分商品分类</Radio
-                >
+                  >部分商品分类</Radio>
+
               </RadioGroup>
             </FormItem>
 
@@ -202,6 +213,7 @@
                 v-model="form.scopeIdGoods"
               ></Cascader>
             </FormItem>
+
             <div>
               <Button :disabled="disabled" type="text" @click="closeCurrentPage"
                 >返回</Button
@@ -229,6 +241,7 @@ import {
   editPlatformCoupon,
 } from "@/api/promotion";
 import { getCategoryTree } from "@/api/goods";
+import { getBoxList } from "@/api/blindBox";
 import { regular } from "@/utils";
 import skuSelect from "@/views/lili-dialog";
 
@@ -300,12 +313,16 @@ export default {
         getType: "FREE",
         promotionGoodsList: [],
         scopeIdGoods: [],
+        blindBoxId: "",
+        name:"",
         rangeDayType: "",
+
       },
       id: this.$route.query.id, // 优惠券id
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
       goodsCategoryList: [], // 商品分类列表
+      boxList:[],
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
         couponName: [{ required: true, message: "优惠券名称不能为空" }],
@@ -395,6 +412,7 @@ export default {
   },
   async mounted() {
     await this.getCagetoryList();
+    await this.getBoxList();
     // 如果id不为空则查询信息
     if (this.id) {
       this.getCoupon();
@@ -593,36 +611,42 @@ export default {
       this.form.promotionGoodsList = list;
     },
     async getCagetoryList() {
-      // 获取全部商品分类
-      let data = await getCategoryTree();
-      this.goodsCategoryList = data.result;
-      // 过滤出可显示的值
-      this.goodsCategoryList = this.goodsCategoryList.map((item) => {
-        if (item.children) {
-          item.children = item.children.map((child) => {
-            if (child.children) {
-              child.children = child.children.map((son) => {
-                return {
-                  value: son.id,
-                  label: son.name,
-                };
-              });
-              return {
-                value: child.id,
-                label: child.name,
-                children: child.children,
-              };
-            } else {
-              return {
-                value: child.id,
-                label: child.name,
-              };
-            }
-          });
-        }
-        return { value: item.id, label: item.name, children: item.children };
-      });
-    },
+            // 获取全部商品分类
+            let data = await getCategoryTree();
+            this.goodsCategoryList = data.result;
+            // 过滤出可显示的值
+            this.goodsCategoryList = this.goodsCategoryList.map((item) => {
+              if (item.children) {
+                item.children = item.children.map((child) => {
+                  if (child.children) {
+                    child.children = child.children.map((son) => {
+                      return {
+                        value: son.id,
+                        label: son.name,
+                      };
+                    });
+                    return {
+                      value: child.id,
+                      label: child.name,
+                      children: child.children,
+                    };
+                  } else {
+                    return {
+                      value: child.id,
+                      label: child.name,
+                    };
+                  }
+                });
+              }
+              return { value: item.id, label: item.name, children: item.children };
+            });
+          },
+     async getBoxList() {
+          // 获取全部商品分类
+          getBoxList().then((res) => {
+          this.boxList = res.result;
+            })
+        },
     filterCategoryId(list, idArr) {
       // 递归获取分类id
       list.forEach((e) => {
