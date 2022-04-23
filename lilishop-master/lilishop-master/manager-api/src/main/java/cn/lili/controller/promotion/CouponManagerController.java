@@ -59,7 +59,7 @@ public class CouponManagerController {
     @PostMapping(consumes = "application/json", produces = "application/json")
     public ResultMessage<CouponVO> addCoupon(@RequestBody CouponVO couponVO) {
         this.setStoreInfo(couponVO);
-        couponService.savePromotions(couponVO);
+        couponService.savePromotionsList(couponVO);
         return ResultUtil.data(couponVO);
     }
 

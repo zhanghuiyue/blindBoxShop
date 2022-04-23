@@ -66,4 +66,10 @@ public interface CouponService extends AbstractPromotionsService<Coupon> {
      */
     CouponVO getDetail(String couponId);
 
+    /**
+     * 促销列表
+     * @param couponVO
+     * @return
+     */
+    boolean savePromotionsList(CouponVO couponVO);
 }

@@ -1,5 +1,6 @@
 package cn.lili.modules.promotion.entity.vos;
 
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.promotion.entity.dos.Coupon;
 import cn.lili.modules.promotion.entity.dos.PromotionGoods;
 import io.swagger.annotations.ApiModel;
@@ -32,6 +33,9 @@ public class CouponVO extends Coupon {
      */
     @ApiModelProperty(value = "优惠券关联商品集合")
     private List<PromotionGoods> promotionGoodsList;
+
+    @ApiModelProperty(value = "盲盒集合")
+    private List<BlindBoxDTO> boxList;
 
     public CouponVO(Coupon coupon) {
         if (coupon == null) {

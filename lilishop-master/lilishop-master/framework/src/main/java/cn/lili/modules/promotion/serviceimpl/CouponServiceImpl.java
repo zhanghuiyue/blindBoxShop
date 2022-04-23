@@ -7,6 +7,7 @@ import cn.lili.common.enums.ResultCode;
 import cn.lili.common.exception.ServiceException;
 import cn.lili.common.utils.DateUtil;
 import cn.lili.common.vo.PageVO;
+import cn.lili.modules.blindBox.entity.dto.BlindBoxDTO;
 import cn.lili.modules.goods.entity.dos.GoodsSku;
 import cn.lili.modules.goods.service.GoodsSkuService;
 import cn.lili.modules.promotion.entity.dos.Coupon;
@@ -27,10 +28,13 @@ import cn.lili.mybatis.util.PageUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -163,6 +167,39 @@ public class CouponServiceImpl extends AbstractPromotionsServiceImpl<CouponMappe
         return couponVO;
     }
 
+    @Override
+    public boolean savePromotionsList(CouponVO couponVO) {
+        this.initPromotion(couponVO);
+        this.checkPromotions(couponVO);
+        boolean save = false;
+        if(CollectionUtils.isNotEmpty(couponVO.getBoxList())) {
+            List<Coupon> couponVOList = getCouponVOList(couponVO);
+            save = this.saveBatch(couponVOList);
+        }else {
+             save = this.save(couponVO);
+        }
+        if (this.updatePromotionsGoods(couponVO)) {
+            this.updateEsGoodsIndex(couponVO);
+        }
+        return save;
+    }
+
+    /**
+     * 获取优惠券列表
+     * @param couponVO
+     * @return
+     */
+    public List<Coupon> getCouponVOList(CouponVO couponVO){
+        List<Coupon> couponList = new ArrayList<>();
+        for (BlindBoxDTO blindBoxDTO:couponVO.getBoxList()) {
+            Coupon coupon = new Coupon();
+            BeanUtils.copyProperties(couponVO,coupon);
+            coupon.setBlindBoxId(blindBoxDTO.getId());
+            coupon.setName(blindBoxDTO.getName());
+            couponList.add(coupon);
+        }
+        return  couponList;
+    }
     /**
      * 更新促销状态
      * 如果要更新促销状态为关闭，startTime和endTime置为空即可

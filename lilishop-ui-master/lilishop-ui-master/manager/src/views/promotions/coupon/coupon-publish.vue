@@ -62,18 +62,16 @@
                 <Option value="ACTIVITY">活动赠送</Option>
               </Select>
             </FormItem>
-
-            <FormItem label="盲盒" prop="blindBoxId">
-                 <Select v-model="form.blindBoxId" style="width: 200px">
-                         <Option
-                           v-for="item in boxList"
-                           :value="item.id"
-                           :key="item.id"
-                           >{{ item.name }}
-                         </Option>
-                 </Select>
-            </FormItem>
-
+           <FormItem label="优惠券概率" prop="probability">
+                <Input
+                  :disabled="disabled"
+                  type="text"
+                  v-model="form.probability"
+                  placeholder="优惠券概率"
+                  clearable
+                  style="width: 260px"
+                />
+           </FormItem>
             <FormItem label="店铺承担比例" prop="storeCommission">
               <Input
                 :disabled="disabled"
@@ -170,7 +168,7 @@
                 <Radio :disabled="disabled" label="PORTION_GOODS">指定商品</Radio>
                 <Radio :disabled="disabled" label="PORTION_GOODS_CATEGORY"
                   >部分商品分类</Radio>
-
+                <Radio :disabled="disabled" label="PORTION_BOX">盲盒</Radio>
               </RadioGroup>
             </FormItem>
 
@@ -205,6 +203,37 @@
               </Table>
             </FormItem>
 
+            <FormItem style="width: 100%" v-if="form.scopeType == 'PORTION_BOX'">
+                    <div style="display: flex; margin-bottom: 10px">
+                      <Button :disabled="disabled" type="primary" @click="openBoxList"
+                        >选择盲盒</Button
+                      >
+                      <Button
+                        :disabled="disabled"
+                        type="error"
+                        ghost
+                        style="margin-left: 10px"
+                        @click="delSelectBoxs"
+                        >批量删除</Button
+                      >
+                    </div>
+                    <Table
+                      border
+                      :columns="columnBoxs"
+                      :data="form.boxList"
+                      @on-selection-change="changeSelectBox"
+                    >
+                      <template slot-scope="{ row }" slot="QRCode">
+                        <img
+                          :src="row.QRCode || '../../../assets/lili.png'"
+                          width="50px"
+                          height="50px"
+                          alt=""
+                        />
+                      </template>
+                    </Table>
+            </FormItem>
+
             <FormItem v-if="form.scopeType == 'PORTION_GOODS_CATEGORY'">
               <Cascader
                 :disabled="disabled"
@@ -231,6 +260,7 @@
       </Form>
     </Card>
     <sku-select ref="skuSelect" @selectedGoodsData="selectedGoodsData"></sku-select>
+     <box-select ref="boxSelect" @selectedBoxData="selectedBoxData"></box-select>
   </div>
 </template>
 
@@ -244,11 +274,12 @@ import { getCategoryTree } from "@/api/goods";
 import { getBoxList } from "@/api/blindBox";
 import { regular } from "@/utils";
 import skuSelect from "@/views/lili-dialog";
-
+import boxSelect from "@/views/lili-dialog";
 export default {
   name: "edit-platform-coupon",
   components: {
     skuSelect,
+    boxSelect,
   },
   watch: {
     "form.getType": {
@@ -312,19 +343,22 @@ export default {
         promotionName: "",
         getType: "FREE",
         promotionGoodsList: [],
+        boxList:[],
         scopeIdGoods: [],
         blindBoxId: "",
         name:"",
         rangeDayType: "",
-
+        probability:""
       },
       id: this.$route.query.id, // 优惠券id
       submitLoading: false, // 添加或编辑提交状态
       selectedGoods: [], // 已选商品列表，便于删除
+      selectedBoxs: [], // 已选商品列表，便于删除
       goodsCategoryList: [], // 商品分类列表
       boxList:[],
       formRule: {
         promotionName: [{ required: true, message: "活动名称不能为空" }],
+        probability:[{ required: true, message: "概率不能为空" }],
         couponName: [{ required: true, message: "优惠券名称不能为空" }],
         price: [{ required: true, message: "请输入面额" }, { validator: checkPrice }],
         rangeTime: [{ required: true, message: "请选择优惠券有效期" }],
@@ -403,6 +437,60 @@ export default {
           },
         },
       ],
+      columnBoxs: [
+              {
+                type: "selection",
+                width: 60,
+                align: "center",
+              },
+              {
+                title: "id",
+                key: "id",
+                minWidth: 120,
+              },
+              {
+                title: "盲盒名称",
+                key: "name",
+                minWidth: 120,
+              },
+              {
+                title: "盲盒价格",
+                key: "price",
+                minWidth: 40,
+                render: (h, params) => {
+                  return h("div", this.$options.filters.unitPrice(params.row.price, "￥"));
+                },
+              },
+              {
+                title: "盲盒类型",
+                key: "blindBoxType",
+                minWidth: 40,
+              },
+              {
+                title: "操作",
+                key: "action",
+                minWidth: 50,
+                align: "center",
+                render: (h, params) => {
+                  return h(
+                    "Button",
+                    {
+                      props: {
+                        size: "small",
+                        type: "error",
+                        ghost: true,
+                      },
+                      on: {
+                        click: () => {
+                          this.delBox(params.index);
+                        },
+                      },
+                    },
+                    "删除"
+                  );
+                },
+              },
+            ],
       options: {
         disabledDate(date) {
           return date && date.valueOf() < Date.now() - 86400000;
@@ -515,6 +603,11 @@ export default {
             scopeId = this.filterCategoryId(params.scopeIdGoods, []);
             params.scopeId = scopeId.toString();
             delete params.promotionGoodsList;
+          }else if(params.scopeType == "PORTION_BOX"){
+              params.boxList.forEach((item) => {
+                scopeId.push(item.id);
+              });
+              params.scopeId = scopeId.toString();
           }
           delete params.scopeIdGoods;
 
@@ -610,6 +703,59 @@ export default {
       });
       this.form.promotionGoodsList = list;
     },
+    openBoxList() {
+          // 显示商品选择器
+          this.$refs.boxSelect.open("box");
+          let data = JSON.parse(JSON.stringify(this.form.boxList));
+          data.forEach((e) => {
+            e.id = e.id;
+          });
+          this.$refs.boxSelect.boxData = data;
+        },
+        changeSelectBox(e) {
+        this.selectedBoxs = [];
+          // 已选商品批量选择
+          this.selectedBoxs = e;
+        },
+        delSelectBoxs() {
+          // 多选删除商品
+          if (this.selectedBoxs.length <= 0) {
+            this.$Message.warning("您还未选择要删除的数据");
+            return;
+          }
+          this.$Modal.confirm({
+            title: "确认删除",
+            content: "您确认要删除所选盲盒吗?",
+            onOk: () => {
+              let ids = [];
+              this.selectedBoxs.forEach(function (e) {
+                ids.push(e.id);
+              });
+              this.form.boxList = this.form.boxList.filter((item) => {
+                return !ids.includes(item.id);
+              });
+            },
+          });
+        },
+        delBox(index) {
+          // 删除商品
+          this.form.boxList.splice(index, 1);
+        },
+        selectedBoxData(item) {
+          // 回显已选商品
+          let list = [];
+          item.forEach((e) => {
+            list.push({
+              id: e.id,
+              name: e.name,
+              categoryName: e.categoryName,
+              categoryId: e.categoryId,
+              price: e.price,
+              blindBoxType: e.blindBoxType
+            });
+          });
+          this.form.boxList = list;
+        },
     async getCagetoryList() {
             // 获取全部商品分类
             let data = await getCategoryTree();
@@ -644,7 +790,8 @@ export default {
      async getBoxList() {
           // 获取全部商品分类
           getBoxList().then((res) => {
-          this.boxList = res.result;
+          this.boxList = res.result.blindBoxDTOList;
+
             })
         },
     filterCategoryId(list, idArr) {
